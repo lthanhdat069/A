@@ -53,8 +53,9 @@ local Tabs = {
 Tabs.Main0:AddButton({
 	Title = "tiktok bạn:)",              -- 👈 tên nút
 	Description = "oách xà lách vô cùng",-- 👈 mô tả nút
-	Callback = function()
-		tiktok.com/@...12.29-- 👈 link sao chép	
+Callback = function()
+		setclipboard("https://www.tiktok.com/@jannie3342?_t=ZS-90QsJQ5j0NO&_r=1")  -- 👈 link sao chép
+   end	
 })
 
 ------------------------------------------------
