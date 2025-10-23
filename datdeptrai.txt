@@ -111,7 +111,7 @@ Tabs.Main1:AddButton({
 
 
 Tabs.Main1:AddButton({
-    Title = "antislap",,
+    Title = "antislap",
     Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
 	Callback = function()
 		local Settings = {
