@@ -105,4 +105,20 @@ Tabs.Main1:AddButton({
 		}
 		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))()
 	  end
-})     
+})
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = "vfly",
+    Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/amdzy088/Immune-slap-tower-/main/Immune%20slap%20tower%20work"))()
+	  end
+}) 
+		     
