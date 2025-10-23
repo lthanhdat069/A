@@ -32,8 +32,8 @@ repeat wait() until game:IsLoaded()
 
 -- 🪟 Cửa sổ chính
 local Window = Fluent:CreateWindow({
-	Title = "lê thành đạt =}",         -- 👈 đổi thành tên script của bạn
-	SubTitle = "vip lắm",              -- 👈 đổi mô tả phụ
+	Title = "Đạt😏😏 =}",         -- 👈 đổi thành tên script của bạn
+	SubTitle = "update không ngừng",              -- 👈 đổi mô tả phụ
 	TabWidth = 157,
 	Size = UDim2.fromOffset(450, 300),
 	Acrylic = true,
@@ -54,8 +54,7 @@ Tabs.Main0:AddButton({
 	Title = "tiktok bạn:)",              -- 👈 tên nút
 	Description = "oách xà lách vô cùng",-- 👈 mô tả nút
 	Callback = function()
-		tiktok.com/@...12.29-- 👈 link sao chép
-	end
+		tiktok.com/@...12.29-- 👈 link sao chép	
 })
 
 ------------------------------------------------
@@ -73,10 +72,6 @@ Tabs.Main1:AddButton({
 	 end
 })
 
-
-
-
-
 Tabs.Main1:AddButton({
     Title = "vfly",
     Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
@@ -88,10 +83,6 @@ Tabs.Main1:AddButton({
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-V-fly-20577"))()
      end
 })
-
-
-
-
 
 Tabs.Main1:AddButton({
     Title = "tàng hình",
@@ -105,10 +96,6 @@ Tabs.Main1:AddButton({
 	 end
 })
 
-
-
-
-
 Tabs.Main1:AddButton({
     Title = "antislap",
     Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
@@ -120,10 +107,6 @@ Tabs.Main1:AddButton({
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/amdzy088/Immune-slap-tower-/main/Immune%20slap%20tower%20work"))()
      end
 })
-
-
-
-
 
 Tabs.Main1:AddButton({
     Title = " Bay v3", 
@@ -137,10 +120,6 @@ Tabs.Main1:AddButton({
      end
 })
 
-
-
-
-
 Tabs.Main1:AddButton({
     Title = "đi trên không",
     Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
@@ -153,10 +132,6 @@ Tabs.Main1:AddButton({
      end
 })
 
-
-
-
-
 Tabs.Main1:AddButton({
     Title = "noclip",
     Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
@@ -168,10 +143,6 @@ Tabs.Main1:AddButton({
         loadstring(game:HttpGet("https://obj.wearedevs.net/197981/scripts/roblox%20noclip%20GUI.lua"))()
      end
 })
-
-
-
-
 
 Tabs.Main1:AddButton({
     Title = "fe admin",
