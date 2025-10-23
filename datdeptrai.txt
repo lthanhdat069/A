@@ -121,3 +121,206 @@ Tabs.Main1:AddButton({
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/amdzy088/Immune-slap-tower-/main/Immune%20slap%20tower%20work"))()
      end
 })
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = "admin",                             -- 👈 tên nút hiển thị
+	Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))() -- 👈 link script tải
+	 end
+})
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = "vfly",
+    Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-V-fly-20577"))()
+     end
+})
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = "tàng hình",
+    Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))()
+	 end
+})
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = " Bay v3", 
+    Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+     end
+})
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = "admin",                             -- 👈 tên nút hiển thị
+	Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))() -- 👈 link script tải
+	 end
+})
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = "vfly",
+    Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-V-fly-20577"))()
+     end
+})
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = "tàng hình",
+    Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))()
+	 end
+})
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = "đi trên không",
+    Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+		loadstring(game:HttpGet("https://pastefy.app/Qc1ZIUwO/raw", true))()
+     end
+})
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = "admin",                             -- 👈 tên nút hiển thị
+	Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))() -- 👈 link script tải
+	 end
+})
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = "vfly",
+    Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-V-fly-20577"))()
+     end
+})
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = "tàng hình",
+    Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))()
+	 end
+})
+
+
+
+
+Tabs.Main1:AddButton({
+    Title = "noclip",
+    Description = "script này ngon á đủ chức năng cả😃",-- 👈 mô tả
+	Callback = function()
+		local Settings = {
+			JoinTeam = "Pirates";   -- 👈 team mặc định: Pirates hoặc Marines
+			Translator = true;      -- 👈 bật dịch sang tiếng Việt nếu có
+		}
+		local Noclip = nil
+local Clip = nil
+
+function noclip()
+	Clip = false
+	local function Nocl()
+		if Clip == false and game.Players.LocalPlayer.Character ~= nil then
+			for _,v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+				if v:IsA('BasePart') and v.CanCollide and v.Name ~= floatName then
+					v.CanCollide = false
+				end
+			end
+		end
+		wait(0.21) -- basic optimization
+	end
+	Noclip = game:GetService('RunService').Stepped:Connect(Nocl)
+end
+
+function clip()
+	if Noclip then Noclip:Disconnect() end
+	Clip = true
+end
+
+noclip() -- to toggle noclip() and clip()
+     end
+})
