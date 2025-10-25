@@ -1,434 +1,202 @@
--- Dat Dz 💧 RPG HUB — Delta Stable v7 (Safe GUI LocalScript)
--- LocalScript (StarterGui) — GUI + Intro + Toggle + Tabs
--- An toàn: KHÔNG chứ mã thực thi bên ngoài (no loadstring)
+-- 🌌 Dat Dz 💧 RPG Hub — Avatar Toggle Edition (Aqua Violet Glow v4)
+-- Made by DatDz 😎💧 | Avatar = Nút bật/tắt menu
 
-local Players = game:GetService("Players")
+repeat task.wait() until game:IsLoaded()
+
+-----------------------------------------------------
+-- 🎬 INTRO: Logo + Nhạc mở đầu
+-----------------------------------------------------
+local player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
-local StarterGui = game:GetService("StarterGui")
-local SoundService = game:GetService("SoundService")
 
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local IntroGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+IntroGui.IgnoreGuiInset = true
+IntroGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- remove old
-if playerGui:FindFirstChild("DatDzHub") then
-	playerGui.DatDzHub:Destroy()
-end
+-- Nền mờ
+local Background = Instance.new("Frame", IntroGui)
+Background.BackgroundColor3 = Color3.fromRGB(10, 10, 20)
+Background.BackgroundTransparency = 1
+Background.Size = UDim2.new(1, 0, 1, 0)
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "DatDzHub"
-gui.ResetOnSpawn = false
-gui.Parent = playerGui
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.DisplayOrder = 1000
+-- Logo
+local Logo = Instance.new("TextLabel", IntroGui)
+Logo.AnchorPoint = Vector2.new(0.5, 0.5)
+Logo.Position = UDim2.new(0.5, 0, 0.5, 0)
+Logo.Text = "Dat Dz 💧 RPG Hub"
+Logo.TextColor3 = Color3.fromRGB(120, 180, 255)
+Logo.Font = Enum.Font.GothamBold
+Logo.TextSize = 48
+Logo.TextTransparency = 1
+Logo.BackgroundTransparency = 1
 
--- Utility: notification (uses SetCore if available)
-local function notify(title, text, time)
-	time = time or 3
-	pcall(function()
-		StarterGui:SetCore("SendNotification", {Title = title, Text = text, Duration = time})
-	end)
-end
+local UIStroke = Instance.new("UIStroke", Logo)
+UIStroke.Color = Color3.fromRGB(170, 130, 255)
+UIStroke.Thickness = 1.5
 
-----------------------------------------------------------------
--- Intro (4s) with neon border, light sweep, pulse, background reflect
-----------------------------------------------------------------
-local intro = Instance.new("Frame", gui)
-intro.Name = "Intro"
-intro.Size = UDim2.new(1,0,1,0)
-intro.BackgroundColor3 = Color3.fromRGB(8,8,12)
-intro.BackgroundTransparency = 0.25
-intro.BorderSizePixel = 0
+-- Nhạc intro
+local Sound = Instance.new("Sound", workspace)
+Sound.SoundId = "rbxassetid://74697049223758" -- raining tacos id
+Sound.Volume = 1
+Sound.Looped = false
+Sound:Play()
 
--- subtle moving background gradient for "reflect"
-local bgGradient = Instance.new("UIGradient", intro)
-bgGradient.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(30,10,60)),
-	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(20,30,60)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(25,10,45))
-}
-bgGradient.Rotation = 30
+-- Fade in
+TweenService:Create(Background, TweenInfo.new(1), {BackgroundTransparency = 0.4}):Play()
+TweenService:Create(Logo, TweenInfo.new(1.2), {TextTransparency = 0}):Play()
+task.wait(3.5)
+TweenService:Create(Logo, TweenInfo.new(1), {TextTransparency = 1}):Play()
+TweenService:Create(Background, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
+task.wait(1)
+IntroGui:Destroy()
 
--- center group for logo + subtitle
-local center = Instance.new("Frame", intro)
-center.Size = UDim2.new(0, 700, 0, 160)
-center.AnchorPoint = Vector2.new(0.5,0.5)
-center.Position = UDim2.new(0.5, 0, 0.45, 0)
-center.BackgroundTransparency = 1
+-----------------------------------------------------
+-- 🪄 Giao diện menu chính
+-----------------------------------------------------
+local ScreenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- "3D" shadow layer (slightly offset)
-local shadow = Instance.new("TextLabel", center)
-shadow.Size = UDim2.new(1,0,0.6,0)
-shadow.Position = UDim2.new(0,6,0,6) -- offset for shadow effect
-shadow.BackgroundTransparency = 1
-shadow.Text = "Dat Dz 💧 RPG Hub"
-shadow.Font = Enum.Font.GothamBlack
-shadow.TextSize = 44
-shadow.TextColor3 = Color3.fromRGB(30,10,40)
-shadow.TextTransparency = 0.4
-shadow.TextScaled = true
-shadow.RichText = false
-shadow.TextStrokeTransparency = 1
+-- Avatar (nút bật/tắt menu)
+local AvatarButton = Instance.new("ImageButton", ScreenGui)
+AvatarButton.Size = UDim2.new(0, 60, 0, 60)
+AvatarButton.Position = UDim2.new(0.05, 0, 0.2, 0)
+AvatarButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+AvatarButton.Image = "rbxassetid://103173399598412" -- ảnh avatar
+AvatarButton.AutoButtonColor = true
+AvatarButton.Draggable = true
+local AvtCorner = Instance.new("UICorner", AvatarButton)
+AvtCorner.CornerRadius = UDim.new(1, 10)
 
--- main logo label (front)
-local logo = Instance.new("TextLabel", center)
-logo.Size = UDim2.new(1,0,0.6,0)
-logo.Position = UDim2.new(0,0,0,0)
-logo.BackgroundTransparency = 1
-logo.Text = "Dat Dz 💧 RPG Hub"
-logo.Font = Enum.Font.GothamBlack
-logo.TextSize = 44
-logo.TextColor3 = Color3.fromRGB(200,180,255)
-logo.TextTransparency = 1 -- start invisible
-logo.TextScaled = true
-logo.RichText = false
-logo.TextStrokeTransparency = 0.6
-logo.ZIndex = 5
+-- Menu chính
+local MenuFrame = Instance.new("Frame", ScreenGui)
+MenuFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MenuFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+MenuFrame.Size = UDim2.new(0, 500, 0, 340)
+MenuFrame.BackgroundColor3 = Color3.fromRGB(25, 20, 35)
+MenuFrame.Visible = false
+local Corner = Instance.new("UICorner", MenuFrame)
+Corner.CornerRadius = UDim.new(0, 12)
 
--- neon outline using UIStroke
-local stroke = Instance.new("UIStroke", logo)
-stroke.Color = Color3.fromRGB(160,110,255)
-stroke.Thickness = 2
-stroke.Transparency = 0.6
+-- Header
+local Header = Instance.new("Frame", MenuFrame)
+Header.Size = UDim2.new(1, 0, 0, 40)
+Header.BackgroundColor3 = Color3.fromRGB(40, 30, 60)
+Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 12)
 
--- small subtitle line under logo
-local subtitle = Instance.new("TextLabel", center)
-subtitle.Size = UDim2.new(1,0,0.2,0)
-subtitle.Position = UDim2.new(0,0,0.62,0)
-subtitle.BackgroundTransparency = 1
-subtitle.Text = "Delta Stable v3 — Aqua Violet Glow Edition"
-subtitle.Font = Enum.Font.GothamSemibold
-subtitle.TextSize = 18
-subtitle.TextColor3 = Color3.fromRGB(170,140,255)
-subtitle.TextTransparency = 1
-subtitle.TextScaled = true
+local Title = Instance.new("TextLabel", Header)
+Title.Text = "🌌 Dat Dz 💧 RPG Hub"
+Title.Size = UDim2.new(1, 0, 1, 0)
+Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.fromRGB(170, 130, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 20
 
--- light sweep overlay (UIGradient) applied to a transparent Frame over the logo
-local sweep = Instance.new("Frame", center)
-sweep.Size = UDim2.new(1,0,0.6,0)
-sweep.Position = UDim2.new(0,0,0,0)
-sweep.BackgroundTransparency = 1
-sweep.ZIndex = 6
-local sweepFill = Instance.new("Frame", sweep)
-sweepFill.Size = UDim2.new(0.2,0,1,0)
-sweepFill.Position = UDim2.new(-0.25,0,0,0)
-sweepFill.BackgroundColor3 = Color3.fromRGB(255,255,255)
-sweepFill.BackgroundTransparency = 0.85
-local sweepGrad = Instance.new("UIGradient", sweepFill)
-sweepGrad.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(120,80,255)),
-	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255,255,255)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(120,180,255))
-}
-sweepGrad.Transparency = NumberSequence.new{
-	NumberSequenceKeypoint.new(0,0.85),
-	NumberSequenceKeypoint.new(0.5,0),
-	NumberSequenceKeypoint.new(1,0.85)
-}
-sweepFill.ZIndex = 6
+-- Tab thanh ngang
+local TabBar = Instance.new("Frame", MenuFrame)
+TabBar.Position = UDim2.new(0, 0, 0, 40)
+TabBar.Size = UDim2.new(1, 0, 0, 35)
+TabBar.BackgroundColor3 = Color3.fromRGB(30, 25, 45)
+Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 12)
 
--- pulse glow behind logo: ImageLabel using a soft circle (we'll create with ImageLabel and color)
-local pulse = Instance.new("ImageLabel", center)
-pulse.Size = UDim2.new(0.9,0,0.9,0)
-pulse.Position = UDim2.new(0.05,0, -0.05,0)
-pulse.BackgroundTransparency = 1
--- use a soft circle texture; if offline, fallback to a colored Frame
-pulse.Image = "rbxassetid://4996891970" -- soft glow image (roblox asset)
-pulse.ImageColor3 = Color3.fromRGB(140,90,255)
-pulse.ImageTransparency = 0.9
-pulse.ZIndex = 3
+local Tab1Button = Instance.new("TextButton", TabBar)
+Tab1Button.Size = UDim2.new(0.5, -5, 1, 0)
+Tab1Button.Position = UDim2.new(0, 0, 0, 0)
+Tab1Button.Text = "🧩 Nhập Script"
+Tab1Button.Font = Enum.Font.GothamBold
+Tab1Button.TextColor3 = Color3.fromRGB(180, 140, 255)
+Tab1Button.BackgroundColor3 = Color3.fromRGB(50, 40, 70)
+Instance.new("UICorner", Tab1Button).CornerRadius = UDim.new(0, 10)
 
--- background music (intro) — single play
-local introSound = Instance.new("Sound")
-introSound.SoundId = "rbxassetid://74697049223758"
-introSound.Volume = 0.9
-introSound.Looped = false
-introSound.RollOffMode = Enum.RollOffMode.InverseTapered
-introSound.Parent = SoundService
+local Tab2Button = Instance.new("TextButton", TabBar)
+Tab2Button.Size = UDim2.new(0.5, -5, 1, 0)
+Tab2Button.Position = UDim2.new(0.5, 5, 0, 0)
+Tab2Button.Text = "⚡ Script Phổ Biến"
+Tab2Button.Font = Enum.Font.GothamBold
+Tab2Button.TextColor3 = Color3.fromRGB(180, 140, 255)
+Tab2Button.BackgroundColor3 = Color3.fromRGB(50, 40, 70)
+Instance.new("UICorner", Tab2Button).CornerRadius = UDim.new(0, 10)
 
--- animate intro: fade in logo, zoom slight, pulse, sweep, subtitle, wait 4s, then fade out
-local function playIntro()
-	-- initial states
-	logo.TextTransparency = 1
-	shadow.TextTransparency = 0.6
-	subtitle.TextTransparency = 1
-	pulse.ImageTransparency = 0.95
-	sweepFill.Position = UDim2.new(-0.25,0,0,0)
-	-- play sound
-	pcall(function() introSound:Play() end)
-	-- fade in + slight scale (we emulate scale by changing TextSize slightly)
-	TweenService:Create(logo, TweenInfo.new(0.9, Enum.EasingStyle.Quad), {TextTransparency = 0}):Play()
-	TweenService:Create(shadow, TweenInfo.new(0.9, Enum.EasingStyle.Quad), {TextTransparency = 0.2}):Play()
-	TweenService:Create(subtitle, TweenInfo.new(0.9, Enum.EasingStyle.Quad), {TextTransparency = 0}):Play()
-	TweenService:Create(pulse, TweenInfo.new(0.7, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, -1, true), {ImageTransparency = 0.7}):Play()
-	-- sweep move across during 4s
-	local sweepTween = TweenService:Create(sweepFill, TweenInfo.new(1.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, -1, false), {Position = UDim2.new(1.15,0,0,0)})
-	sweepTween:Play()
-	-- pulse scale animation (tweening by resizing the frame)
-	local pulseTween1 = TweenService:Create(pulse, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, -1, true), {Size = UDim2.new(0.95,0,0.95,0)})
-	pulseTween1:Play()
-	-- wait full intro time (4s)
-	task.wait(4)
-	-- fade out all intro elements
-	TweenService:Create(logo, TweenInfo.new(0.8, Enum.EasingStyle.Quad), {TextTransparency = 1}):Play()
-	TweenService:Create(shadow, TweenInfo.new(0.8, Enum.EasingStyle.Quad), {TextTransparency = 1}):Play()
-	TweenService:Create(subtitle, TweenInfo.new(0.8, Enum.EasingStyle.Quad), {TextTransparency = 1}):Play()
-	TweenService:Create(pulse, TweenInfo.new(0.8, Enum.EasingStyle.Quad), {ImageTransparency = 1}):Play()
-	TweenService:Create(sweepFill, TweenInfo.new(0.6, Enum.EasingStyle.Quad), {Position = UDim2.new(1.5,0,0,0)}):Play()
-	task.wait(0.9)
-	-- destroy intro
-	if intro and intro.Parent then
-		intro:Destroy()
-	end
-end
+-----------------------------------------------------
+-- 🧩 Tab 1: Nhập Script
+-----------------------------------------------------
+local Tab1 = Instance.new("Frame", MenuFrame)
+Tab1.Position = UDim2.new(0, 0, 0, 75)
+Tab1.Size = UDim2.new(1, 0, 1, -75)
+Tab1.BackgroundTransparency = 1
 
--- play intro (spawn so it doesn't block)
-spawn(playIntro)
+local Box = Instance.new("TextBox", Tab1)
+Box.Size = UDim2.new(1, -30, 0, 150)
+Box.Position = UDim2.new(0, 15, 0, 20)
+Box.PlaceholderText = "Dán script vào đây..."
+Box.TextColor3 = Color3.fromRGB(180, 140, 255)
+Box.BackgroundColor3 = Color3.fromRGB(30, 25, 45)
+Box.TextWrapped = true
+Box.TextYAlignment = Enum.TextYAlignment.Top
+Box.Font = Enum.Font.Gotham
+Box.ClearTextOnFocus = false
+Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 8)
 
-----------------------------------------------------------------
--- After intro: slight welcome text then spawn menu
-----------------------------------------------------------------
-local function showWelcomeThenMenu()
-	-- small wait to ensure intro destroyed
-	repeat task.wait() until not intro.Parent
-	-- welcome overlay
-	local welcomeGui = Instance.new("ScreenGui", gui)
-	welcomeGui.Name = "WelcomeGui"
-	welcomeGui.ResetOnSpawn = false
-	local wLabel = Instance.new("TextLabel", welcomeGui)
-	wLabel.AnchorPoint = Vector2.new(0.5,0.5)
-	wLabel.Position = UDim2.new(0.5,0,0.45,0)
-	wLabel.Size = UDim2.new(0,600,0,70)
-	wLabel.BackgroundTransparency = 1
-	wLabel.Font = Enum.Font.GothamSemibold
-	wLabel.Text = "✨ Welcome DatDz 💧 — Have Fun in RPG Hub!"
-	wLabel.TextColor3 = Color3.fromRGB(200,180,255)
-	wLabel.TextScaled = true
-	wLabel.TextTransparency = 1
-	-- fade in / out
-	TweenService:Create(wLabel, TweenInfo.new(0.7), {TextTransparency = 0}):Play()
-	task.wait(2.2)
-	TweenService:Create(wLabel, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
-	task.wait(0.9)
-	if welcomeGui and welcomeGui.Parent then welcomeGui:Destroy() end
-	-- reveal menu (menu created below; set Visible true)
-	if gui:FindFirstChild("DatDzMenu") then
-		gui.DatDzMenu.Visible = true
-		-- menu pop-in scale effect (we emulate via BackgroundTransparency change & position shift)
-		local m = gui.DatDzMenu
-		m.BackgroundTransparency = 1
-		TweenService:Create(m, TweenInfo.new(0.45, Enum.EasingStyle.Quad), {BackgroundTransparency = 0}):Play()
-	end
-end
+local RunButton = Instance.new("TextButton", Tab1)
+RunButton.Size = UDim2.new(0, 120, 0, 35)
+RunButton.Position = UDim2.new(0.5, -60, 1, -50)
+RunButton.BackgroundColor3 = Color3.fromRGB(100, 70, 180)
+RunButton.Text = "▶️ Chạy Script"
+RunButton.TextColor3 = Color3.new(1, 1, 1)
+RunButton.Font = Enum.Font.GothamBold
+RunButton.TextSize = 14
+Instance.new("UICorner", RunButton).CornerRadius = UDim.new(0, 8)
 
--- spawn welcome after sound length roughly; but we wait for intro destruction
-spawn(showWelcomeThenMenu)
+-----------------------------------------------------
+-- ⚡ Tab 2: Script Phổ Biến
+-----------------------------------------------------
+local Tab2 = Instance.new("Frame", MenuFrame)
+Tab2.Position = UDim2.new(0, 0, 0, 75)
+Tab2.Size = UDim2.new(1, 0, 1, -75)
+Tab2.BackgroundTransparency = 1
+Tab2.Visible = false
 
-----------------------------------------------------------------
--- Main Menu (center), starts hidden (Visible = false)
-----------------------------------------------------------------
-local menuGui = Instance.new("Frame")
-menuGui.Name = "DatDzMenu"
-menuGui.Size = UDim2.new(0,520,0,360)
-menuGui.AnchorPoint = Vector2.new(0.5,0.5)
-menuGui.Position = UDim2.new(0.5,0,0.5,0)
-menuGui.BackgroundColor3 = Color3.fromRGB(18,12,30)
-menuGui.BackgroundTransparency = 1 -- start invisible; will be tweened visible
-menuGui.Visible = false
-menuGui.Parent = gui
-local menuCorner = Instance.new("UICorner", menuGui)
-menuCorner.CornerRadius = UDim.new(0,14)
+local Example = Instance.new("TextLabel", Tab2)
+Example.Text = "📜 Tại đây bạn có thể thêm các script phổ biến!"
+Example.Size = UDim2.new(1, 0, 0, 40)
+Example.Position = UDim2.new(0, 0, 0, 30)
+Example.BackgroundTransparency = 1
+Example.TextColor3 = Color3.fromRGB(160, 120, 255)
+Example.Font = Enum.Font.Gotham
+Example.TextSize = 16
 
--- subtle border glow (ImageLabel)
-local borderGlow = Instance.new("ImageLabel", menuGui)
-borderGlow.Size = UDim2.new(1.12,0,1.12,0)
-borderGlow.Position = UDim2.new(-0.06,0,-0.06,0)
-borderGlow.BackgroundTransparency = 1
-borderGlow.ZIndex = -1
-borderGlow.Image = "rbxassetid://4996891970"
-borderGlow.ImageColor3 = Color3.fromRGB(140,90,255)
-borderGlow.ImageTransparency = 0.85
+-----------------------------------------------------
+-- 🧭 Tab chuyển đổi
+-----------------------------------------------------
+Tab1Button.MouseButton1Click:Connect(function()
+	Tab1.Visible = true
+	Tab2.Visible = false
+end)
 
--- Title inside menu
-local titleLabel = Instance.new("TextLabel", menuGui)
-titleLabel.Size = UDim2.new(1,0,0,48)
-titleLabel.Position = UDim2.new(0,0,0,8)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.Text = "Dat Dz 💧 RPG Hub"
-titleLabel.TextColor3 = Color3.fromRGB(200,180,255)
-titleLabel.TextScaled = true
+Tab2Button.MouseButton1Click:Connect(function()
+	Tab1.Visible = false
+	Tab2.Visible = true
+end)
 
--- Tab bar
-local tabBar = Instance.new("Frame", menuGui)
-tabBar.Size = UDim2.new(1,0,0,40)
-tabBar.Position = UDim2.new(0,0,0,56)
-tabBar.BackgroundTransparency = 1
-
-local tabA = Instance.new("TextButton", tabBar)
-tabA.Size = UDim2.new(0.5, -6, 1, 0)
-tabA.Position = UDim2.new(0, 6, 0, 0)
-tabA.Text = "🧩 Nhập Script"
-tabA.Font = Enum.Font.GothamBold
-tabA.TextColor3 = Color3.fromRGB(220,200,255)
-tabA.BackgroundColor3 = Color3.fromRGB(30,20,45)
-tabA.TextScaled = true
-local cornerA = Instance.new("UICorner", tabA); cornerA.CornerRadius = UDim.new(0,8)
-
-local tabB = tabA:Clone()
-tabB.Parent = tabBar
-tabB.Position = UDim2.new(0.5, 6, 0, 0)
-tabB.Text = "⚡ Script Phổ Biến"
-
--- content frames
-local content = Instance.new("Frame", menuGui)
-content.Size = UDim2.new(1, -24, 1, -120)
-content.Position = UDim2.new(0,12,0,110)
-content.BackgroundTransparency = 1
-
-local page1 = Instance.new("Frame", content)
-page1.Size = UDim2.new(1,0,1,0)
-page1.BackgroundTransparency = 1
-page1.Visible = true
-
-local page2 = Instance.new("Frame", content)
-page2.Size = UDim2.new(1,0,1,0)
-page2.BackgroundTransparency = 1
-page2.Position = UDim2.new(0,0,0,0)
-page2.Visible = false
-
--- Page1: TextBox (multi-line) and Copy button (safe: copy to clipboard)
-local scriptBox = Instance.new("TextBox", page1)
-scriptBox.Size = UDim2.new(0.96,0,0.55,0)
-scriptBox.Position = UDim2.new(0.02,0,0,0)
-scriptBox.BackgroundColor3 = Color3.fromRGB(26,18,40)
-scriptBox.TextColor3 = Color3.fromRGB(200,180,255)
-scriptBox.PlaceholderText = "Dán script của bạn vào đây (an toàn: paste vào executor tự xử lý)..."
-scriptBox.ClearTextOnFocus = false
-scriptBox.Font = Enum.Font.Code
-scriptBox.TextWrapped = true
-scriptBox.MultiLine = true
-local sbCorner = Instance.new("UICorner", scriptBox); sbCorner.CornerRadius = UDim.new(0,8)
-
-local copyBtn = Instance.new("TextButton", page1)
-copyBtn.Size = UDim2.new(0.36,0,0,38)
-copyBtn.Position = UDim2.new(0.32,0,0.58,0)
-copyBtn.Text = "📋 Sao chép vào clipboard"
-copyBtn.BackgroundColor3 = Color3.fromRGB(100,65,190)
-copyBtn.Font = Enum.Font.GothamBold
-copyBtn.TextColor3 = Color3.fromRGB(255,255,255)
-local cbCorner = Instance.new("UICorner", copyBtn); cbCorner.CornerRadius = UDim.new(0,8)
-
-copyBtn.MouseButton1Click:Connect(function()
-	local txt = scriptBox.Text or ""
-	-- Try to use setclipboard (available in many executors). If not available, show notification with length.
-	local ok, err = pcall(function() setclipboard(txt) end)
-	if ok then
-		notify("✅ Đã sao chép", "Script đã được sao chép vào clipboard.", 2)
+-----------------------------------------------------
+-- 🧿 Ấn Avatar để bật / tắt menu
+-----------------------------------------------------
+local open = false
+AvatarButton.MouseButton1Click:Connect(function()
+	open = not open
+	if open then
+		MenuFrame.Visible = true
+		MenuFrame.BackgroundTransparency = 1
+		MenuFrame.Size = UDim2.new(0, 0, 0, 0)
+		TweenService:Create(MenuFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			BackgroundTransparency = 0.1,
+			Size = UDim2.new(0, 500, 0, 340)
+		}):Play()
 	else
-		notify("⚠️ Không thể sao chép", "Executor/Studio không hỗ trợ setclipboard. Copy thủ công.", 4)
-		-- as fallback: put the script into a small modal for manual copy (we show the text length)
-		notify("ℹ️ Thông tin", ("Độ dài script: %d ký tự"):format(#txt), 3)
+		TweenService:Create(MenuFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			BackgroundTransparency = 1,
+			Size = UDim2.new(0, 0, 0, 0)
+		}):Play()
+		task.wait(0.4)
+		MenuFrame.Visible = false
 	end
 end)
-
--- Page2: empty placeholder (you can add buttons here later)
-local placeholder = Instance.new("TextLabel", page2)
-placeholder.Size = UDim2.new(1,0,1,0)
-placeholder.BackgroundTransparency = 1
-placeholder.Text = "Tab Script Phổ Biến: để trống — dán link hoặc code vào ô bên kia."
-placeholder.Font = Enum.Font.GothamSemibold
-placeholder.TextColor3 = Color3.fromRGB(190,170,255)
-placeholder.TextScaled = true
-
--- tab switching
-tabA.MouseButton1Click:Connect(function()
-	page1.Visible = true
-	page2.Visible = false
-	tabA.BackgroundColor3 = Color3.fromRGB(40,30,60)
-	tabB.BackgroundColor3 = Color3.fromRGB(30,20,45)
-end)
-tabB.MouseButton1Click:Connect(function()
-	page1.Visible = false
-	page2.Visible = true
-	tabB.BackgroundColor3 = Color3.fromRGB(40,30,60)
-	tabA.BackgroundColor3 = Color3.fromRGB(30,20,45)
-end)
-
--- small info / close hint
-local hint = Instance.new("TextLabel", menuGui)
-hint.Size = UDim2.new(1,0,0,28)
-hint.Position = UDim2.new(0,0,1,-38)
-hint.BackgroundTransparency = 1
-hint.Font = Enum.Font.Gotham
-hint.Text = "Nhấn nút tròn để ẩn / hiện menu — Script box lưu tạm trong clipboard."
-hint.TextColor3 = Color3.fromRGB(150,130,200)
-hint.TextScaled = true
-
-----------------------------------------------------------------
--- Toggle button (always visible)
-----------------------------------------------------------------
-local toggle = Instance.new("ImageButton", gui)
-toggle.Size = UDim2.new(0,54,0,54)
-toggle.Position = UDim2.new(0, 16, 0.8, 0)
-toggle.AnchorPoint = Vector2.new(0,0)
-toggle.BackgroundColor3 = Color3.fromRGB(26,18,40)
-toggle.Image = "rbxassetid://6031090990" -- icon
-toggle.AutoButtonColor = true
-local tgCorner = Instance.new("UICorner", toggle); tgCorner.CornerRadius = UDim.new(1,0)
-
--- click sound (ping)
-local click = Instance.new("Sound", toggle)
-click.SoundId = "rbxassetid://9118825142"
-click.Volume = 0.5
-click.Looped = false
-
-local isOpen = false
-toggle.MouseButton1Click:Connect(function()
-	isOpen = not isOpen
-	pcall(function() click:Play() end)
-	if isOpen then
-		menuGui.Visible = true
-		TweenService:Create(menuGui, TweenInfo.new(0.45, Enum.EasingStyle.Quad), {BackgroundTransparency = 0}):Play()
-		-- small pop/zoom effect on menu (we emulate by tweening position slightly)
-		local origPos = menuGui.Position
-		menuGui.Position = origPos + UDim2.new(0,0,0,15)
-		TweenService:Create(menuGui, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = origPos}):Play()
-	else
-		-- fade out then hide
-		TweenService:Create(menuGui, TweenInfo.new(0.35, Enum.EasingStyle.Quad), {BackgroundTransparency = 1}):Play()
-		task.delay(0.35, function() menuGui.Visible = false end)
-	end
-end)
-
-----------------------------------------------------------------
--- Watermark top-right (blinking)
-----------------------------------------------------------------
-local watermark = Instance.new("TextLabel", gui)
-watermark.Size = UDim2.new(0,220,0,28)
-watermark.Position = UDim2.new(0.78,0,0.02,0)
-watermark.BackgroundTransparency = 1
-watermark.Font = Enum.Font.GothamBold
-watermark.Text = "Dat Dz 💧 RPG Hub"
-watermark.TextColor3 = Color3.fromRGB(170,130,255)
-watermark.TextScaled = true
-watermark.TextTransparency = 0.2
-
-spawn(function()
-	while watermark and watermark.Parent do
-		TweenService:Create(watermark, TweenInfo.new(1), {TextTransparency = 0.6}):Play()
-		task.wait(1)
-		TweenService:Create(watermark, TweenInfo.new(1), {TextTransparency = 0.2}):Play()
-		task.wait(1)
-	end
-end)
-
-----------------------------------------------------------------
--- Safety note (no auto-execution). Optional helper:
--- When Run/Copy used, you can paste into your executor to run.
-----------------------------------------------------------------
-
--- final: initial state (menu hidden until intro + welcome finished)
-menuGui.Visible = false
-
--- end of script
