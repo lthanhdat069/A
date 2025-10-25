@@ -1,202 +1,214 @@
--- 🌌 Dat Dz 💧 RPG Hub — Avatar Toggle Edition (Aqua Violet Glow v4)
--- Made by DatDz 😎💧 | Avatar = Nút bật/tắt menu
+-- 🌌 DAT DZ 💧 RPG HUB — AQUA VIOLET GLOW EDITION v3.7
+-- Made by Dat Dz 😎💧 | Có sẵn 5 script phổ biến
 
 repeat task.wait() until game:IsLoaded()
-
------------------------------------------------------
--- 🎬 INTRO: Logo + Nhạc mở đầu
------------------------------------------------------
-local player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 
-local IntroGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+-----------------------------------------------------
+-- 🎬 INTRO
+-----------------------------------------------------
+local IntroGui = Instance.new("ScreenGui", game.CoreGui)
 IntroGui.IgnoreGuiInset = true
-IntroGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Nền mờ
 local Background = Instance.new("Frame", IntroGui)
-Background.BackgroundColor3 = Color3.fromRGB(10, 10, 20)
-Background.BackgroundTransparency = 1
+Background.BackgroundColor3 = Color3.fromRGB(10, 10, 25)
 Background.Size = UDim2.new(1, 0, 1, 0)
+Background.BackgroundTransparency = 1
 
--- Logo
 local Logo = Instance.new("TextLabel", IntroGui)
 Logo.AnchorPoint = Vector2.new(0.5, 0.5)
 Logo.Position = UDim2.new(0.5, 0, 0.5, 0)
-Logo.Text = "Dat Dz 💧 RPG Hub"
-Logo.TextColor3 = Color3.fromRGB(120, 180, 255)
+Logo.Text = "💧 Dat Dz 💧 RPG Hub"
+Logo.TextColor3 = Color3.fromRGB(130, 170, 255)
 Logo.Font = Enum.Font.GothamBold
 Logo.TextSize = 48
-Logo.TextTransparency = 1
 Logo.BackgroundTransparency = 1
+Logo.TextTransparency = 1
 
 local UIStroke = Instance.new("UIStroke", Logo)
-UIStroke.Color = Color3.fromRGB(170, 130, 255)
+UIStroke.Color = Color3.fromRGB(190, 120, 255)
 UIStroke.Thickness = 1.5
 
--- Nhạc intro
-local Sound = Instance.new("Sound", workspace)
-Sound.SoundId = "rbxassetid://74697049223758" -- raining tacos id
+local Sound = Instance.new("Sound", game.SoundService)
+Sound.SoundId = "rbxassetid://74697049223758"
 Sound.Volume = 1
 Sound.Looped = false
 Sound:Play()
 
--- Fade in
-TweenService:Create(Background, TweenInfo.new(1), {BackgroundTransparency = 0.4}):Play()
-TweenService:Create(Logo, TweenInfo.new(1.2), {TextTransparency = 0}):Play()
-task.wait(3.5)
+TweenService:Create(Background, TweenInfo.new(0.8), {BackgroundTransparency = 0.4}):Play()
+TweenService:Create(Logo, TweenInfo.new(1, Enum.EasingStyle.Quad), {TextTransparency = 0}):Play()
+task.wait(2.8)
 TweenService:Create(Logo, TweenInfo.new(1), {TextTransparency = 1}):Play()
 TweenService:Create(Background, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
 task.wait(1)
 IntroGui:Destroy()
 
 -----------------------------------------------------
--- 🪄 Giao diện menu chính
+-- 🔘 Nút bật/tắt menu
 -----------------------------------------------------
-local ScreenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
--- Avatar (nút bật/tắt menu)
-local AvatarButton = Instance.new("ImageButton", ScreenGui)
-AvatarButton.Size = UDim2.new(0, 60, 0, 60)
-AvatarButton.Position = UDim2.new(0.05, 0, 0.2, 0)
-AvatarButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-AvatarButton.Image = "rbxassetid://103173399598412" -- ảnh avatar
-AvatarButton.AutoButtonColor = true
-AvatarButton.Draggable = true
-local AvtCorner = Instance.new("UICorner", AvatarButton)
-AvtCorner.CornerRadius = UDim.new(1, 10)
-
--- Menu chính
-local MenuFrame = Instance.new("Frame", ScreenGui)
-MenuFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-MenuFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-MenuFrame.Size = UDim2.new(0, 500, 0, 340)
-MenuFrame.BackgroundColor3 = Color3.fromRGB(25, 20, 35)
-MenuFrame.Visible = false
-local Corner = Instance.new("UICorner", MenuFrame)
-Corner.CornerRadius = UDim.new(0, 12)
-
--- Header
-local Header = Instance.new("Frame", MenuFrame)
-Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundColor3 = Color3.fromRGB(40, 30, 60)
-Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 12)
-
-local Title = Instance.new("TextLabel", Header)
-Title.Text = "🌌 Dat Dz 💧 RPG Hub"
-Title.Size = UDim2.new(1, 0, 1, 0)
-Title.BackgroundTransparency = 1
-Title.TextColor3 = Color3.fromRGB(170, 130, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 20
-
--- Tab thanh ngang
-local TabBar = Instance.new("Frame", MenuFrame)
-TabBar.Position = UDim2.new(0, 0, 0, 40)
-TabBar.Size = UDim2.new(1, 0, 0, 35)
-TabBar.BackgroundColor3 = Color3.fromRGB(30, 25, 45)
-Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 12)
-
-local Tab1Button = Instance.new("TextButton", TabBar)
-Tab1Button.Size = UDim2.new(0.5, -5, 1, 0)
-Tab1Button.Position = UDim2.new(0, 0, 0, 0)
-Tab1Button.Text = "🧩 Nhập Script"
-Tab1Button.Font = Enum.Font.GothamBold
-Tab1Button.TextColor3 = Color3.fromRGB(180, 140, 255)
-Tab1Button.BackgroundColor3 = Color3.fromRGB(50, 40, 70)
-Instance.new("UICorner", Tab1Button).CornerRadius = UDim.new(0, 10)
-
-local Tab2Button = Instance.new("TextButton", TabBar)
-Tab2Button.Size = UDim2.new(0.5, -5, 1, 0)
-Tab2Button.Position = UDim2.new(0.5, 5, 0, 0)
-Tab2Button.Text = "⚡ Script Phổ Biến"
-Tab2Button.Font = Enum.Font.GothamBold
-Tab2Button.TextColor3 = Color3.fromRGB(180, 140, 255)
-Tab2Button.BackgroundColor3 = Color3.fromRGB(50, 40, 70)
-Instance.new("UICorner", Tab2Button).CornerRadius = UDim.new(0, 10)
+local Core = Instance.new("ScreenGui", game.CoreGui)
+local Avatar = Instance.new("ImageButton", Core)
+Avatar.Size = UDim2.new(0, 50, 0, 50)
+Avatar.Position = UDim2.new(0.05, 0, 0.18, 0)
+Avatar.Image = "rbxassetid://103173399598412"
+Avatar.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+Avatar.AutoButtonColor = true
+Avatar.Draggable = true
+local UICorner = Instance.new("UICorner", Avatar)
+UICorner.CornerRadius = UDim.new(1, 10)
+local Glow = Instance.new("UIStroke", Avatar)
+Glow.Color = Color3.fromRGB(170, 130, 255)
+Glow.Thickness = 1.4
 
 -----------------------------------------------------
--- 🧩 Tab 1: Nhập Script
+-- 🪟 Fluent UI
 -----------------------------------------------------
-local Tab1 = Instance.new("Frame", MenuFrame)
-Tab1.Position = UDim2.new(0, 0, 0, 75)
-Tab1.Size = UDim2.new(1, 0, 1, -75)
-Tab1.BackgroundTransparency = 1
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+repeat task.wait() until game:IsLoaded()
 
-local Box = Instance.new("TextBox", Tab1)
-Box.Size = UDim2.new(1, -30, 0, 150)
-Box.Position = UDim2.new(0, 15, 0, 20)
-Box.PlaceholderText = "Dán script vào đây..."
-Box.TextColor3 = Color3.fromRGB(180, 140, 255)
-Box.BackgroundColor3 = Color3.fromRGB(30, 25, 45)
-Box.TextWrapped = true
-Box.TextYAlignment = Enum.TextYAlignment.Top
-Box.Font = Enum.Font.Gotham
+local Window = Fluent:CreateWindow({
+	Title = "💧 Dat Dz 💧 RPG Hub",
+	SubTitle = "Aqua Violet Glow Edition",
+	TabWidth = 160,
+	Size = UDim2.fromOffset(520, 340),
+	Acrylic = true,
+	Theme = "Dark",
+	MinimizeKey = Enum.KeyCode.End
+})
+
+-----------------------------------------------------
+-- 📑 Tabs
+-----------------------------------------------------
+local Tabs = {
+	Custom = Window:AddTab({ Title = "🧩 Nhập Script" }),
+	Common = Window:AddTab({ Title = "⚡ Script Phổ Biến" }),
+}
+
+-----------------------------------------------------
+-- 🧩 Nhập script
+-----------------------------------------------------
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 460, 0, 160)
+Frame.Position = UDim2.new(0, 25, 0, 50)
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+Frame.Parent = Tabs.Custom.Container
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
+
+local Box = Instance.new("TextBox", Frame)
+Box.Size = UDim2.new(1, -20, 1, -50)
+Box.Position = UDim2.new(0, 10, 0, 10)
+Box.Text = ""
+Box.PlaceholderText = "💧 Dán script của bạn vào đây..."
+Box.TextColor3 = Color3.fromRGB(150, 120, 255)
+Box.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
 Box.ClearTextOnFocus = false
+Box.TextWrapped = true
+Box.MultiLine = true
+Box.Font = Enum.Font.Gotham
 Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 8)
 
-local RunButton = Instance.new("TextButton", Tab1)
-RunButton.Size = UDim2.new(0, 120, 0, 35)
-RunButton.Position = UDim2.new(0.5, -60, 1, -50)
-RunButton.BackgroundColor3 = Color3.fromRGB(100, 70, 180)
+local RunButton = Instance.new("TextButton", Frame)
+RunButton.Size = UDim2.new(0, 120, 0, 38)
+RunButton.Position = UDim2.new(0.5, -60, 1, -42)
+RunButton.BackgroundColor3 = Color3.fromRGB(120, 80, 200)
 RunButton.Text = "▶️ Chạy Script"
 RunButton.TextColor3 = Color3.new(1, 1, 1)
 RunButton.Font = Enum.Font.GothamBold
-RunButton.TextSize = 14
+RunButton.TextSize = 15
 Instance.new("UICorner", RunButton).CornerRadius = UDim.new(0, 8)
 
------------------------------------------------------
--- ⚡ Tab 2: Script Phổ Biến
------------------------------------------------------
-local Tab2 = Instance.new("Frame", MenuFrame)
-Tab2.Position = UDim2.new(0, 0, 0, 75)
-Tab2.Size = UDim2.new(1, 0, 1, -75)
-Tab2.BackgroundTransparency = 1
-Tab2.Visible = false
-
-local Example = Instance.new("TextLabel", Tab2)
-Example.Text = "📜 Tại đây bạn có thể thêm các script phổ biến!"
-Example.Size = UDim2.new(1, 0, 0, 40)
-Example.Position = UDim2.new(0, 0, 0, 30)
-Example.BackgroundTransparency = 1
-Example.TextColor3 = Color3.fromRGB(160, 120, 255)
-Example.Font = Enum.Font.Gotham
-Example.TextSize = 16
-
------------------------------------------------------
--- 🧭 Tab chuyển đổi
------------------------------------------------------
-Tab1Button.MouseButton1Click:Connect(function()
-	Tab1.Visible = true
-	Tab2.Visible = false
-end)
-
-Tab2Button.MouseButton1Click:Connect(function()
-	Tab1.Visible = false
-	Tab2.Visible = true
-end)
-
------------------------------------------------------
--- 🧿 Ấn Avatar để bật / tắt menu
------------------------------------------------------
-local open = false
-AvatarButton.MouseButton1Click:Connect(function()
-	open = not open
-	if open then
-		MenuFrame.Visible = true
-		MenuFrame.BackgroundTransparency = 1
-		MenuFrame.Size = UDim2.new(0, 0, 0, 0)
-		TweenService:Create(MenuFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			BackgroundTransparency = 0.1,
-			Size = UDim2.new(0, 500, 0, 340)
-		}):Play()
+RunButton.MouseButton1Click:Connect(function()
+	if Box.Text ~= "" then
+		loadstring(Box.Text)()
 	else
-		TweenService:Create(MenuFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-			BackgroundTransparency = 1,
-			Size = UDim2.new(0, 0, 0, 0)
-		}):Play()
-		task.wait(0.4)
-		MenuFrame.Visible = false
+		game.StarterGui:SetCore("SendNotification", {
+			Title = "💧 Dat Dz Hub";
+			Text = "Bạn chưa nhập script!";
+			Duration = 3;
+		})
+	end
+end)
+
+-----------------------------------------------------
+-- ⚡ Script phổ biến
+-----------------------------------------------------
+Tabs.Common:AddButton({
+	Title = "💨 Fly V3",
+	Description = "Bay mượt và nhanh",
+	Callback = function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+	end
+})
+
+Tabs.Common:AddButton({
+	Title = "👑 Admin (Infinite Yield)",
+	Description = "Giao diện quản trị mạnh mẽ",
+	Callback = function()
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))()
+	end
+})
+
+Tabs.Common:AddButton({
+	Title = "🌀 Invisible FE",
+	Description = "Tàng hình chuẩn, không lỗi",
+	Callback = function()
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))()
+	end
+})
+
+Tabs.Common:AddButton({
+	Title = "🚀 Speed Boost",
+	Description = "Tăng tốc di chuyển",
+	Callback = function()
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Speed-Boost-12345"))()
+	end
+})
+
+Tabs.Common:AddButton({
+	Title = "🌾 Auto Farm",
+	Description = "Tự động farm cực nhanh",
+	Callback = function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/example/autofarm/main/script.lua"))()
+	end
+})
+
+Tabs.Common:AddButton({
+	Title = "💥 Kill Aura",
+	Description = "Tự tấn công đối thủ xung quanh",
+	Callback = function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/example/killaura/main/script.lua"))()
+	end
+})
+
+-----------------------------------------------------
+-- 💫 Ẩn/hiện menu bằng avatar
+-----------------------------------------------------
+local MenuVisible = true
+Avatar.MouseButton1Click:Connect(function()
+	MenuVisible = not MenuVisible
+	local sizeGoal = MenuVisible and UDim2.fromOffset(520, 340) or UDim2.fromOffset(0, 0)
+	local fadeGoal = MenuVisible and 1 or 0
+	TweenService:Create(Window.Window, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+		Size = sizeGoal,
+		GroupTransparency = 1 - fadeGoal
+	}):Play()
+	task.wait(0.3)
+	Window.Window.Visible = MenuVisible
+end)
+
+-----------------------------------------------------
+-- ✨ Watermark
+-----------------------------------------------------
+local Watermark = Instance.new("TextLabel", Core)
+Watermark.Text = "💧 Dat Dz 💧 RPG Hub"
+Watermark.Font = Enum.Font.GothamBold
+Watermark.TextColor3 = Color3.fromRGB(170, 130, 255)
+Watermark.TextTransparency = 0.25
+Watermark.Position = UDim2.new(0.75, 0, 0.03, 0)
+Watermark.Size = UDim2.new(0, 200, 0, 30)
+Watermark.BackgroundTransparency = 1
+task.spawn(function()
+	while task.wait(1) do
+		Watermark.TextTransparency = (Watermark.TextTransparency == 0.25) and 0.5 or 0.25
 	end
 end)
