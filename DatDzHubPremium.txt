@@ -1,500 +1,186 @@
--- 🌌 DATDZ HUB 💧 | Final Premium (Có ESP nội bộ)
--- Paste vào executor và chạy. (Đã tích hợp: intro ping, watermark góc phải trên, click sound, blur/rung khi mở, 2 tab, lưu/mở/xoá script, ESP)
-
+-- 🌌 DATDZ HUB 💧 | Fixed Menu Visible
 repeat task.wait() until game:IsLoaded()
 
--- services
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 
--- ---------------------------
--- Intro "Dat Dz" + âm ping (fade-in)
--- ---------------------------
-do
-	local IntroGui = Instance.new("ScreenGui")
-	IntroGui.IgnoreGuiInset = true
-	IntroGui.ResetOnSpawn = false
-	IntroGui.Parent = CoreGui
+-- Intro DatDz + âm thanh
+local intro = Instance.new("ScreenGui", CoreGui)
+local text = Instance.new("TextLabel", intro)
+text.Size = UDim2.new(1,0,1,0)
+text.BackgroundTransparency = 1
+text.Text = "Dat Dz 💧 RPG Hub"
+text.Font = Enum.Font.FredokaOne
+text.TextScaled = true
+text.TextColor3 = Color3.fromRGB(0,255,255)
+text.TextTransparency = 1
 
-	local TextLabel = Instance.new("TextLabel")
-	TextLabel.Parent = IntroGui
-	TextLabel.Size = UDim2.new(1,0,1,0)
-	TextLabel.BackgroundTransparency = 1
-	TextLabel.Text = "Dat Dz 💧 RPG Script Hub" -- 👈 đổi chữ intro nếu muốn
-	TextLabel.TextColor3 = Color3.fromRGB(0,255,255)
-	TextLabel.TextScaled = true
-	TextLabel.Font = Enum.Font.FredokaOne
-	TextLabel.TextTransparency = 1
+local sound = Instance.new("Sound", intro)
+sound.SoundId = "rbxassetid://9120780434"
+sound.Volume = 1
+sound:Play()
 
-	-- glow
-	local glow = Instance.new("UIStroke")
-	glow.Parent = TextLabel
-	glow.Thickness = 2
-	glow.Color = Color3.fromRGB(0,255,255)
+TweenService:Create(text, TweenInfo.new(1), {TextTransparency = 0}):Play()
+task.wait(2)
+TweenService:Create(text, TweenInfo.new(1), {TextTransparency = 1}):Play()
+task.wait(1)
+intro:Destroy()
 
-	-- sound ping (nhẹ)
-	local Sound = Instance.new("Sound")
-	Sound.SoundId = "rbxassetid://9120780434" -- 👈 đổi ID âm thanh ping nếu muốn
-	Sound.Volume = 1
-	Sound.Parent = IntroGui
-	Sound:Play()
+-- Watermark góc phải
+local wm = Instance.new("ScreenGui", CoreGui)
+local label = Instance.new("TextLabel", wm)
+label.AnchorPoint = Vector2.new(1,0)
+label.Position = UDim2.new(1,-10,0,10)
+label.Size = UDim2.new(0,180,0,40)
+label.BackgroundTransparency = 1
+label.Text = "Dat Dz 💧\nRPG Script Hub"
+label.TextColor3 = Color3.fromRGB(0,255,255)
+label.Font = Enum.Font.FredokaOne
+label.TextSize = 14
+label.TextXAlignment = Enum.TextXAlignment.Right
+label.TextYAlignment = Enum.TextYAlignment.Top
 
-	local fadeIn = TweenService:Create(TextLabel, TweenInfo.new(1.0, Enum.EasingStyle.Sine), {TextTransparency = 0})
-	local fadeOut = TweenService:Create(TextLabel, TweenInfo.new(1.0, Enum.EasingStyle.Sine), {TextTransparency = 1})
-	fadeIn:Play()
-	task.wait(2.2)
-	fadeOut:Play()
-	task.wait(1.0)
-	IntroGui:Destroy()
-end
+-- Nút mở menu
+local btnGui = Instance.new("ScreenGui", CoreGui)
+local openBtn = Instance.new("ImageButton", btnGui)
+openBtn.BackgroundColor3 = Color3.fromRGB(15,15,15)
+openBtn.Position = UDim2.new(0.05,0,0.15,0)
+openBtn.Size = UDim2.new(0,45,0,45)
+openBtn.Draggable = true
+openBtn.Image = "rbxassetid://103173399598412"
+local corner = Instance.new("UICorner", openBtn)
+corner.CornerRadius = UDim.new(1,10)
 
--- ---------------------------
--- Watermark góc phải trên (Dat Dz + phụ: RPG Script Hub) + subtle glow + nhấp nháy
--- ---------------------------
-do
-	local wmGui = Instance.new("ScreenGui")
-	wmGui.Name = "DatDzWatermark"
-	wmGui.Parent = CoreGui
-	wmGui.ResetOnSpawn = false
-	wmGui.IgnoreGuiInset = true
+local clickSnd = Instance.new("Sound", btnGui)
+clickSnd.SoundId = "rbxassetid://9118822952"
+clickSnd.Volume = 1
 
-	local frame = Instance.new("Frame")
-	frame.Parent = wmGui
-	frame.AnchorPoint = Vector2.new(1,0) -- góc phải trên
-	frame.Position = UDim2.new(1, -10, 0, 10) -- cách 10px từ góc phải trên
-	frame.Size = UDim2.new(0, 180, 0, 36)
-	frame.BackgroundTransparency = 1
-
-	local txt = Instance.new("TextLabel")
-	txt.Parent = frame
-	txt.Size = UDim2.new(1,0,1,0)
-	txt.BackgroundTransparency = 1
-	txt.Text = "Dat Dz 💧\nRPG Script Hub" -- 👈 đổi nếu muốn
-	txt.TextColor3 = Color3.fromRGB(0, 255, 255)
-	txt.TextScaled = false
-	txt.TextSize = 14
-	txt.Font = Enum.Font.FredokaOne
-	txt.TextStrokeTransparency = 0.8
-	txt.TextTransparency = 0.4
-	txt.TextXAlignment = Enum.TextXAlignment.Right
-	txt.TextYAlignment = Enum.TextYAlignment.Top
-	txt.RichText = false
-
-	-- aura glow (UIStroke)
-	local stroke = Instance.new("UIStroke")
-	stroke.Parent = txt
-	stroke.Color = Color3.fromRGB(120, 255, 255)
-	stroke.Thickness = 1
-	stroke.Transparency = 0.6
-
-	-- nhấp nháy nhẹ (tween)
-	spawn(function()
-		while txt and txt.Parent do
-			local t1 = TweenService:Create(txt, TweenInfo.new(1.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {TextTransparency = 0.25})
-			local t2 = TweenService:Create(txt, TweenInfo.new(1.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {TextTransparency = 0.6})
-			t1:Play() t1.Completed:Wait()
-			t2:Play() t2.Completed:Wait()
-		end
-	end)
-end
-
--- ---------------------------
--- Nút mở menu (nằm nổi, draggable)
--- ---------------------------
-local MenuButtonGui = Instance.new("ScreenGui")
-MenuButtonGui.Parent = CoreGui
-MenuButtonGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-local ImageButton = Instance.new("ImageButton")
-ImageButton.Parent = MenuButtonGui
-ImageButton.BackgroundColor3 = Color3.fromRGB(0,0,0)
-ImageButton.BorderSizePixel = 0
-ImageButton.Position = UDim2.new(0.08,0,0.18,0)
-ImageButton.Size = UDim2.new(0,45,0,45)
-ImageButton.Draggable = true
-ImageButton.Image = "http://www.roblox.com/asset/?id=103173399598412" -- 👈 đổi ảnh nút mở menu tại đây
-local UICorner = Instance.new("UICorner", ImageButton)
-UICorner.CornerRadius = UDim.new(1,10)
-
--- click sound (open/close)
-local ClickSound = Instance.new("Sound")
-ClickSound.SoundId = "rbxassetid://9118822952" -- 👈 đổi nếu muốn
-ClickSound.Volume = 1
-ClickSound.Parent = MenuButtonGui
-
--- ---------------------------
--- Load Fluent UI
--- ---------------------------
+-- 🧩 Load Fluent UI (đảm bảo load trước)
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-repeat task.wait() until game:IsLoaded()
+repeat task.wait() until Fluent and typeof(Fluent.CreateWindow) == "function"
 
+-- Tạo window
 local Window = Fluent:CreateWindow({
 	Title = "DatDz HUB 💧",
 	SubTitle = "RPG & Script Hub",
-	TabWidth = 160,
+	TabWidth = 150,
 	Size = UDim2.fromOffset(520, 340),
 	Acrylic = true,
-	Theme = "Aqua", -- 👈 Theme: Aqua (font/màu)
+	Theme = "Aqua",
 	MinimizeKey = Enum.KeyCode.End
 })
 
--- Tabs ngang trên cùng
+-- Thêm tab
 local Tabs = {
 	Executor = Window:AddTab({ Title = "Nhập Script 🧩" }),
 	Scripts = Window:AddTab({ Title = "Script Phổ Biến ⚙️" })
 }
 
--- ---------------------------
--- Executor Tab (Nhập script, lưu, mở, xoá)
--- ---------------------------
+-- 🧠 EXECUTOR TAB
 local savedScript = nil
-local TextBox = Tabs.Executor:AddTextbox("💬 Dán Script Tại Đây", "Nhập loadstring hoặc code script...", function() end)
+local box = Tabs.Executor:AddTextbox("💬 Dán Script", "Nhập code...", function() end)
 
 Tabs.Executor:AddButton({
 	Title = "▶️ Chạy Script",
-	Description = "Thực thi code bạn vừa nhập",
 	Callback = function()
-		local text = TextBox.Value
-		if text and text ~= "" then
-			local success, err = pcall(function() loadstring(text)() end)
-			if success then
-				savedScript = text
-				StarterGui:SetCore("SendNotification", {Title="✅ Thành công!", Text="Script đã chạy.", Duration=3})
-			else
-				StarterGui:SetCore("SendNotification", {Title="❌ Lỗi Script", Text=tostring(err), Duration=5})
-			end
-		else
-			StarterGui:SetCore("SendNotification", {Title="⚠️ Ô trống!", Text="Nhập script trước khi chạy.", Duration=3})
+		local txt = box.Value
+		if txt ~= "" then
+			pcall(function() loadstring(txt)() end)
+			savedScript = txt
+			StarterGui:SetCore("SendNotification", {Title="✅ Thành công", Text="Đã chạy script", Duration=3})
 		end
 	end
 })
 
 Tabs.Executor:AddButton({
-	Title = "💾 Lưu Script Gần Đây",
-	Description = "Lưu lại script bạn vừa chạy",
+	Title = "💾 Lưu Script",
 	Callback = function()
-		if savedScript then
-			if writefile then
-				writefile("DatDz_LastScript.txt", savedScript)
-				StarterGui:SetCore("SendNotification", {Title="💾 Đã lưu!", Text="Script được lưu.", Duration=3})
-			else
-				StarterGui:SetCore("SendNotification", {Title="⚠️ Không hỗ trợ", Text="Executor không hỗ trợ writefile().", Duration=4})
-			end
-		else
-			StarterGui:SetCore("SendNotification", {Title="⚠️ Không có script!", Text="Chạy script trước khi lưu.", Duration=3})
+		if writefile and savedScript then
+			writefile("DatDz_Last.txt", savedScript)
+			StarterGui:SetCore("SendNotification", {Title="💾 Đã lưu", Text="Đã lưu script gần đây", Duration=3})
 		end
 	end
 })
 
 Tabs.Executor:AddButton({
 	Title = "📂 Mở Script Gần Đây",
-	Description = "Tải script đã lưu lần trước",
 	Callback = function()
-		if isfile and isfile("DatDz_LastScript.txt") then
-			local content = readfile("DatDz_LastScript.txt")
-			TextBox:SetValue(content)
-			StarterGui:SetCore("SendNotification", {Title="📂 Đã tải!", Text="Script gần đây đã nạp.", Duration=3})
-		else
-			StarterGui:SetCore("SendNotification", {Title="⚠️ Chưa có file!", Text="Chưa có script đã lưu.", Duration=3})
+		if isfile and isfile("DatDz_Last.txt") then
+			box:SetValue(readfile("DatDz_Last.txt"))
 		end
 	end
 })
 
 Tabs.Executor:AddButton({
-	Title = "🗑️ Xoá Script Đã Lưu",
-	Description = "Xoá file script cũ",
+	Title = "🗑️ Xoá Script",
 	Callback = function()
-		if isfile and isfile("DatDz_LastScript.txt") then
-			if delfile then
-				delfile("DatDz_LastScript.txt")
-				StarterGui:SetCore("SendNotification", {Title="🗑️ Đã xoá!", Text="File đã bị xoá.", Duration=3})
-			else
-				StarterGui:SetCore("SendNotification", {Title="⚠️ Không hỗ trợ", Text="Executor không hỗ trợ delfile().", Duration=4})
-			end
-		else
-			StarterGui:SetCore("SendNotification", {Title="⚠️ Không có file!", Text="Không tìm thấy file để xoá.", Duration=3})
+		if delfile and isfile("DatDz_Last.txt") then
+			delfile("DatDz_Last.txt")
+			StarterGui:SetCore("SendNotification", {Title="🗑️ Đã xoá", Text="Xoá thành công", Duration=3})
 		end
 	end
 })
 
--- ---------------------------
--- Scripts Tab (script phổ biến + ESP nội bộ)
--- ---------------------------
--- Fly V3
+-- ⚙️ SCRIPT TAB
 Tabs.Scripts:AddButton({
 	Title = "Fly V3 ✈️",
-	Description = "Bay mượt (load từ external).",
 	Callback = function()
-		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
-		end)
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
 	end
 })
 
--- Infinite Yield (Admin)
 Tabs.Scripts:AddButton({
-	Title = "Infinite Yield (Admin)",
-	Description = "Menu lệnh admin mạnh mẽ.",
+	Title = "Infinite Yield 🧠",
 	Callback = function()
-		pcall(function()
-			loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))()
-		end)
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))()
 	end
 })
 
--- Invisible
 Tabs.Scripts:AddButton({
 	Title = "Invisible (Tàng hình)",
-	Description = "Ẩn hình.",
 	Callback = function()
-		pcall(function()
-			loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))()
-		end)
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))()
 	end
 })
 
--- Anti Slap
-Tabs.Scripts:AddButton({
-	Title = "Anti Slap 💪",
-	Description = "Miễn nhiễm slap tower.",
-	Callback = function()
-		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/amdzy088/Immune-slap-tower-/main/Immune%20slap%20tower%20work"))()
-		end)
+-- ESP nội bộ (cực nhẹ)
+local espOn = false
+local espFolder = Instance.new("Folder", CoreGui)
+espFolder.Name = "DatDzESP"
+
+local function toggleESP(state)
+	espOn = state
+	for _, gui in ipairs(espFolder:GetChildren()) do gui:Destroy() end
+	if not state then return end
+
+	for _, pl in ipairs(Players:GetPlayers()) do
+		if pl ~= Players.LocalPlayer and pl.Character and pl.Character:FindFirstChild("Head") then
+			local head = pl.Character.Head
+			local bill = Instance.new("BillboardGui", espFolder)
+			bill.Adornee = head
+			bill.Size = UDim2.new(0,120,0,40)
+			bill.AlwaysOnTop = true
+			local txt = Instance.new("TextLabel", bill)
+			txt.Size = UDim2.new(1,0,1,0)
+			txt.BackgroundTransparency = 1
+			txt.Text = pl.Name
+			txt.TextColor3 = Color3.fromRGB(0,255,255)
+			txt.Font = Enum.Font.GothamBold
+			txt.TextSize = 14
+		end
 	end
+end
+
+Tabs.Scripts:AddToggle({
+	Title = "ESP (Hiện tên người chơi)",
+	Callback = toggleESP
 })
 
--- =========================
--- ESP nội bộ (không cần external)
--- Toggle ESP button + keybind optional
--- =========================
-local ESP = {}
-ESP.Enabled = false
-ESP.HighlightDistance = true
-
--- helper: create billboard for a character
-local function createESPForCharacter(char, player)
-	if not char or not char.Parent then return end
-	local head = char:FindFirstChild("Head") or char:FindFirstChildWhichIsA("BasePart")
-	if not head then return end
-
-	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "DatDz_ESP"
-	billboard.Adornee = head
-	billboard.ExtentsOffset = Vector3.new(0, 1.6, 0)
-	billboard.Size = UDim2.new(0, 120, 0, 40)
-	billboard.AlwaysOnTop = true
-	billboard.Parent = head
-
-	local frame = Instance.new("Frame")
-	frame.Size = UDim2.new(1,0,1,0)
-	frame.BackgroundTransparency = 0.35
-	frame.BorderSizePixel = 0
-	frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-	frame.Parent = billboard
-
-	local nameLabel = Instance.new("TextLabel")
-	nameLabel.Parent = frame
-	nameLabel.Size = UDim2.new(1,0,0.5,0)
-	nameLabel.BackgroundTransparency = 1
-	nameLabel.Text = player.Name
-	nameLabel.Font = Enum.Font.GothamBold
-	nameLabel.TextSize = 14
-	nameLabel.TextColor3 = Color3.fromRGB(0,255,255)
-	nameLabel.TextStrokeTransparency = 0.7
-	nameLabel.TextScaled = false
-	nameLabel.RichText = false
-	nameLabel.Position = UDim2.new(0,0,0,0)
-	nameLabel.TextYAlignment = Enum.TextYAlignment.Center
-
-	local distLabel = Instance.new("TextLabel")
-	distLabel.Parent = frame
-	distLabel.Size = UDim2.new(1,0,0.5,0)
-	distLabel.Position = UDim2.new(0,0,0.5,0)
-	distLabel.BackgroundTransparency = 1
-	distLabel.Text = ""
-	distLabel.Font = Enum.Font.Gotham
-	distLabel.TextSize = 12
-	distLabel.TextColor3 = Color3.fromRGB(200,255,255)
-	distLabel.TextStrokeTransparency = 0.8
-	distLabel.TextScaled = false
-	distLabel.TextYAlignment = Enum.TextYAlignment.Center
-
-	-- store reference
-	ESP[player] = {
-		billboard = billboard,
-		nameLabel = nameLabel,
-		distLabel = distLabel,
-		char = char
-	}
-end
-
--- clean up esp for player
-local function removeESPForPlayer(player)
-	local data = ESP[player]
-	if data and data.billboard and data.billboard.Parent then
-		data.billboard:Destroy()
-	end
-	ESP[player] = nil
-end
-
--- update distances each frame
-local function updateESP()
-	local localChar = Players.LocalPlayer.Character
-	if not localChar then return end
-	local hrp = localChar:FindFirstChild("HumanoidRootPart") or localChar:FindFirstChildWhichIsA("BasePart")
-	if not hrp then return end
-	for pl, data in pairs(ESP) do
-		if data and data.distLabel and data.char and data.char.Parent then
-			local part = data.char:FindFirstChild("HumanoidRootPart") or data.char:FindFirstChildWhichIsA("BasePart")
-			if part then
-				local dist = (hrp.Position - part.Position).Magnitude
-				local txt = string.format("%.1f m", dist)
-				data.distLabel.Text = txt
-				-- change color slightly by distance
-				if dist < 20 then
-					data.nameLabel.TextColor3 = Color3.fromRGB(0,255,120)
-				elseif dist < 60 then
-					data.nameLabel.TextColor3 = Color3.fromRGB(0,255,200)
-				else
-					data.nameLabel.TextColor3 = Color3.fromRGB(0,200,255)
-				end
-			end
-		end
-	end
-end
-
--- toggle function
-local function enableESP(enable)
-	ESP.Enabled = enable
-	if enable then
-		-- create for all current players
-		for _, pl in pairs(Players:GetPlayers()) do
-			if pl ~= Players.LocalPlayer and pl.Character and pl.Character.Parent then
-				createESPForCharacter(pl.Character, pl)
-			end
-		end
-	else
-		-- remove all
-		for pl, _ in pairs(ESP) do
-			removeESPForPlayer(pl)
-		end
-	end
-end
-
--- listen for new characters
-Players.PlayerAdded:Connect(function(pl)
-	pl.CharacterAdded:Connect(function(char)
-		if ESP.Enabled and pl ~= Players.LocalPlayer then
-			-- slight wait to ensure head exists
-			task.wait(0.2)
-			createESPForCharacter(char, pl)
-		end
-	end)
-end)
-
-Players.PlayerRemoving:Connect(function(pl)
-	removeESPForPlayer(pl)
-end)
-
--- also hook existing players' CharacterAdded to recreate
-for _, pl in pairs(Players:GetPlayers()) do
-	if pl.Character then
-		-- do nothing here; creation occurs when enabling
-	end
-	pl.CharacterAdded:Connect(function(char)
-		if ESP.Enabled and pl ~= Players.LocalPlayer then
-			task.wait(0.2)
-			createESPForCharacter(char, pl)
-		end
-	end)
-end
-
--- runservice update
-local espConn
-espConn = RunService.RenderStepped:Connect(function()
-	if ESP.Enabled then updateESP() end
-end)
-
--- Add button to toggle ESP
-local espButton = Tabs.Scripts:AddToggle({
-	Title = "ESP (Tên + Khoảng cách)",
-	Description = "Bật/tắt ESP nội bộ (không cần internet).",
-	Enabled = false,
-	Callback = function(val)
-		enableESP(val)
-	end
-})
-
--- optional: hotkey to toggle ESP (press P)
-pcall(function()
-	local UserInputService = game:GetService("UserInputService")
-	UserInputService.InputBegan:Connect(function(input, gameProcessed)
-		if gameProcessed then return end
-		if input.KeyCode == Enum.KeyCode.P then
-			enableESP(not ESP.Enabled)
-			-- update toggle ui if available
-			pcall(function() espButton:Set(not ESP.Enabled) end)
-		end
-	end)
-end)
-
--- ---------------------------
--- Animation Open/Close menu + shake + blur + click sound
--- ---------------------------
-local menuVisible = true
-
-local function shakeGui(gui)
-	task.spawn(function()
-		if not gui then return end
-		local original = gui.Position
-		for i = 1, 6 do
-			gui.Position = original + UDim2.new(0, math.random(-6,6), 0, math.random(-6,6))
-			task.wait(0.02)
-		end
-		gui.Position = original
-	end)
-end
-
-local function toggleMenu()
-	local gui = CoreGui:FindFirstChild("Fluent")
-	if not gui then return end
-	menuVisible = not menuVisible
-	ClickSound:Play()
-	-- create transient blur/light image
-	local blur = Instance.new("ImageLabel")
-	blur.Parent = gui
-	blur.BackgroundTransparency = 1
-	blur.Image = "rbxassetid://11222373871"
-	blur.ImageTransparency = 1
-	blur.Size = UDim2.new(1,0,1,0)
-	blur.ZIndex = -1
-
-	if menuVisible then
-		gui.Enabled = true
-		local t1 = TweenService:Create(blur, TweenInfo.new(0.36, Enum.EasingStyle.Sine), {ImageTransparency = 0.75})
-		t1:Play()
-		shakeGui(gui)
-	else
-		local t2 = TweenService:Create(blur, TweenInfo.new(0.36, Enum.EasingStyle.Sine), {ImageTransparency = 1})
-		t2:Play()
-		task.wait(0.36)
-		gui.Enabled = false
-	end
-
-	task.wait(0.9)
-	if blur and blur.Parent then blur:Destroy() end
-end
-
-ImageButton.MouseButton1Click:Connect(toggleMenu)
-
--- ensure Fluent gui initially visible
-do
+-- Hiệu ứng mở menu
+openBtn.MouseButton1Click:Connect(function()
+	clickSnd:Play()
 	local f = CoreGui:FindFirstChild("Fluent")
-	if f then f.Enabled = true end
-end
-
--- End of DatDz HUB Final Premium
+	if f then f.Enabled = not f.Enabled end
+end)
