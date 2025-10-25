@@ -1,74 +1,70 @@
--- Jack Hub v3 - Amethyst, Animated GUI, Horizontal Tabs
--- Sol built
-
+-- JackHub GUI v3 - Amethyst, Animated, Horizontal Tabs
 repeat task.wait() until game:IsLoaded()
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-
--- ========================
--- CONFIG
--- ========================
+-- ===== CONFIG =====
 local Config = {
     GuiName = "JackHubGUI_v3",
-    ThemeColor = Color3.fromRGB(155, 100, 250), -- Amethyst
+    AvatarImageId = "103173399598412", -- ID ảnh nút mở menu (avatar)
+    WindowTitle = "Jack Hub 💎",
+    WindowSubTitle = "Script vip xịn nhất từ Jack",
+    ThemeColor = Color3.fromRGB(170, 0, 255), -- Amethyst
     WindowWidth = 600,
-    WindowHeight = 380,
-    TabHeight = 46,
-    AnimationTime = 0.28,
-    BackdropMaxTransparency = 0.6
+    WindowHeight = 350,
+    TabHeight = 44,
+    AnimationTime = 0.25
 }
 
--- ========================
--- HELPERS
--- ========================
-local function mk(parent,class,props)
+-- ===== SERVICES =====
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+-- ===== CLEAN OLD GUI =====
+for i,v in pairs(CoreGui:GetChildren()) do
+    if v.Name == Config.GuiName then v:Destroy() end
+end
+
+-- ===== HELPERS =====
+local function mk(parent, class, props)
     local obj = Instance.new(class)
-    if props then
-        for k,v in pairs(props) do
-            if type(k)=="string" then obj[k]=v end
-        end
-    end
+    if props then for k,v in pairs(props) do obj[k] = v end end
     obj.Parent = parent
     return obj
 end
+local function tween(obj, props, time) return TweenService:Create(obj, TweenInfo.new(time), props) end
 
-local function tween(obj,props,time,style,dir)
-    return TweenService:Create(obj,TweenInfo.new(time or Config.AnimationTime,style or Enum.EasingStyle.Quad,dir or Enum.EasingDirection.Out),props)
-end
-
--- Cleanup old GUI
-if CoreGui:FindFirstChild(Config.GuiName) then CoreGui[Config.GuiName]:Destroy() end
-
--- ========================
--- SCREEN GUI
--- ========================
+-- ===== SCREEN GUI =====
 local ScreenGui = mk(CoreGui,"ScreenGui",{Name=Config.GuiName,ResetOnSpawn=false,ZIndexBehavior=Enum.ZIndexBehavior.Sibling})
 
-local Backdrop = mk(ScreenGui,"Frame",{BackgroundColor3=Color3.new(0,0,0),BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Position=UDim2.new(0,0,0,0),Visible=true,ZIndex=2})
+-- ===== BACKDROP =====
+local Backdrop = mk(ScreenGui,"Frame",{BackgroundColor3=Color3.new(),BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Visible=false,ZIndex=2})
 
-local Window = mk(ScreenGui,"Frame",{Size=UDim2.new(0,Config.WindowWidth,0,Config.WindowHeight),Position=UDim2.new(1.2,0,0.5,0),AnchorPoint=Vector2.new(0.5,0.5),BackgroundColor3=Color3.fromRGB(18,24,30),ZIndex=5})
+-- ===== MAIN WINDOW =====
+local Window = mk(ScreenGui,"Frame",{
+    Name="MainWindow",
+    AnchorPoint=Vector2.new(0.5,0.5),
+    Size=UDim2.new(0,Config.WindowWidth,0,Config.WindowHeight),
+    Position=UDim2.new(0.5,0,0.5,0),
+    BackgroundColor3=Color3.fromRGB(30,30,35),
+    ZIndex=5
+})
 mk(Window,"UICorner",{CornerRadius=UDim.new(0,12)})
 
--- Title
-local TitleBar = mk(Window,"Frame",{BackgroundTransparency=1,Size=UDim2.new(1,0,0,54)})
-local TitleLabel = mk(TitleBar,"TextLabel",{BackgroundTransparency=1,Position=UDim2.new(0.02,0,0.14,0),Size=UDim2.new(0.6,0,0.72,0),Text="RGP",Font=Enum.Font.GothamBold,TextSize=20,TextColor3=Color3.fromRGB(155,255,255),TextXAlignment=Enum.TextXAlignment.Left})
-local SubTitleLabel = mk(TitleBar,"TextLabel",{BackgroundTransparency=1,Position=UDim2.new(0.02,0,0.54,0),Size=UDim2.new(0.6,0,0.4,0),Text="Jack Hub v3",Font=Enum.Font.Gotham,TextSize=12,TextColor3=Color3.fromRGB(155,255,255),TextXAlignment=Enum.TextXAlignment.Left})
+-- ===== TITLE BAR =====
+local TitleBar = mk(Window,"Frame",{BackgroundTransparency=1,Size=UDim2.new(1,0,0,50)})
+local TitleLabel = mk(TitleBar,"TextLabel",{BackgroundTransparency=1,Position=UDim2.new(0.02,0,0.1,0),Size=UDim2.new(0.7,0,0.8,0),Text=Config.WindowTitle,Font=Enum.Font.GothamBold,TextSize=20,TextColor3=Config.ThemeColor,TextXAlignment=Enum.TextXAlignment.Left})
+local SubLabel = mk(TitleBar,"TextLabel",{BackgroundTransparency=1,Position=UDim2.new(0.02,0,0.55,0),Size=UDim2.new(0.7,0,0.4,0),Text=Config.WindowSubTitle,Font=Enum.Font.Gotham,TextSize=12,TextColor3=Color3.fromRGB(200,200,255),TextXAlignment=Enum.TextXAlignment.Left})
 
-local CloseBtn = mk(TitleBar,"TextButton",{BackgroundTransparency=0.2,BackgroundColor3=Color3.fromRGB(50,50,60),Position=UDim2.new(0.94,0,0.14,0),Size=UDim2.new(0,30,0,30),Text="X",Font=Enum.Font.GothamBold,TextSize=16,TextColor3=Color3.fromRGB(230,230,230)})
+-- ===== CLOSE BUTTON =====
+local CloseBtn = mk(TitleBar,"TextButton",{BackgroundColor3=Color3.fromRGB(50,50,60),BackgroundTransparency=0.2,Size=UDim2.new(0,30,0,30),Position=UDim2.new(0.93,0,0.15,0),Text="X",Font=Enum.Font.GothamBold,TextSize=16,TextColor3=Color3.fromRGB(230,230,230)})
 mk(CloseBtn,"UICorner",{CornerRadius=UDim.new(0,6)})
 
--- Draggable
-local dragging,dragInput,dragStart,startPos
+-- ===== DRAG WINDOW =====
+local dragging=false
+local dragInput,startPos,dragStart
 TitleBar.InputBegan:Connect(function(input)
     if input.UserInputType==Enum.UserInputType.MouseButton1 then
-        dragging=true
-        dragStart=input.Position
-        startPos=Window.Position
+        dragging=true;dragStart=input.Position;startPos=Window.Position
         input.Changed:Connect(function()
             if input.UserInputState==Enum.UserInputState.End then dragging=false end
         end)
@@ -79,46 +75,46 @@ TitleBar.InputChanged:Connect(function(input)
 end)
 UserInputService.InputChanged:Connect(function(input)
     if input==dragInput and dragging then
-        local delta=input.Position - dragStart
+        local delta=input.Position-dragStart
         Window.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
     end
 end)
 
--- Tabs horizontal
-local TabsBar = mk(Window,"Frame",{BackgroundTransparency=1,Position=UDim2.new(0,0,0.13,0),Size=UDim2.new(1,0,0,Config.TabHeight)})
-local TabsUIList = mk(TabsBar,"UIListLayout",{Padding=UDim.new(0,6),FillDirection=Enum.FillDirection.Horizontal,HorizontalAlignment=Enum.HorizontalAlignment.Left,SortOrder=Enum.SortOrder.LayoutOrder})
+-- ===== TABS BAR =====
+local TabsBar = mk(Window,"Frame",{BackgroundTransparency=1,Position=UDim2.new(0,0,0.15,0),Size=UDim2.new(1,0,0,Config.TabHeight)})
+local TabsUIList = mk(TabsBar,"UIListLayout",{Padding=UDim.new(0,6),FillDirection=Enum.FillDirection.Horizontal,HorizontalAlignment=Enum.HorizontalAlignment.Left})
 TabsUIList.Parent=TabsBar
 
-local ContentContainer = mk(Window,"Frame",{BackgroundTransparency=1,Position=UDim2.new(0,12,0.13 + (Config.TabHeight/Config.WindowHeight),0),Size=UDim2.new(1,-24,1,-(54+12+Config.TabHeight))})
+-- ===== CONTENT CONTAINER =====
+local ContentContainer = mk(Window,"Frame",{BackgroundTransparency=1,Position=UDim2.new(0,10,0.15+Config.TabHeight/Config.WindowHeight,0),Size=UDim2.new(1,-20,1,-(50+10+Config.TabHeight))})
 
+-- ===== FUNCTIONS TO CREATE TABS & BUTTONS =====
 local function createTabButton(name)
-    local btn = mk(TabsBar,"TextButton",{BackgroundColor3=Color3.fromRGB(30,36,45),BackgroundTransparency=0,Size=UDim2.new(0,110,0,Config.TabHeight),Text=""})
-    mk(btn,"UICorner",{CornerRadius=UDim.new(0,8)})
-    local label = mk(btn,"TextLabel",{BackgroundTransparency=1,Position=UDim2.new(0.1,0,0,0),Size=UDim2.new(0.9,0,1,0),Text=name,Font=Enum.Font.Gotham,TextSize=14,TextColor3=Color3.fromRGB(155,255,255),TextXAlignment=Enum.TextXAlignment.Left})
+    local btn = mk(TabsBar,"TextButton",{BackgroundColor3=Color3.fromRGB(35,35,45),Size=UDim2.new(0,120,0,Config.TabHeight),Text="",AutoButtonColor=true})
+    mk(btn,"UICorner",{CornerRadius=UDim.new(0,6)})
+    local label = mk(btn,"TextLabel",{BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Text=name,Font=Enum.Font.GothamBold,TextSize=14,TextColor3=Color3.fromRGB(170,200,255)})
     return btn
 end
-
 local function createContentFrame(name)
     local fr = mk(ContentContainer,"Frame",{BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Visible=false})
-    mk(fr,"UIListLayout",{Padding=UDim.new(0,8),FillDirection=Enum.FillDirection.Vertical,VerticalAlignment=Enum.VerticalAlignment.Top})
+    mk(fr,"UIListLayout",{Padding=UDim.new(0,6),FillDirection=Enum.FillDirection.Vertical,VerticalAlignment=Enum.VerticalAlignment.Top})
     return fr
 end
-
-local function createFuncButton(parent,title,callback)
-    local btn = mk(parent,"TextButton",{BackgroundColor3=Config.ThemeColor,Size=UDim2.new(1,0,0,40),Text=title,TextColor3=Color3.fromRGB(255,255,255),Font=Enum.Font.GothamBold,TextSize=16})
+local function createFuncButton(parent,title,desc,callback)
+    local btn = mk(parent,"TextButton",{BackgroundColor3=Color3.fromRGB(40,45,55),Size=UDim2.new(1,0,0,40),Text="",AutoButtonColor=true})
     mk(btn,"UICorner",{CornerRadius=UDim.new(0,6)})
-    btn.MouseButton1Click:Connect(callback)
+    local t = mk(btn,"TextLabel",{BackgroundTransparency=1,Position=UDim2.new(0.03,0,0,0),Size=UDim2.new(0.6,0,1,0),Text=title,Font=Enum.Font.GothamBold,TextSize=14,TextColor3=Color3.fromRGB(180,220,255),TextXAlignment=Enum.TextXAlignment.Left})
+    local d = mk(btn,"TextLabel",{BackgroundTransparency=1,Position=UDim2.new(0.03,0,0.5,0),Size=UDim2.new(0.95,0,0.5,0),Text=desc,Font=Enum.Font.Gotham,TextSize=12,TextColor3=Color3.fromRGB(150,150,180),TextXAlignment=Enum.TextXAlignment.Left})
+    btn.MouseButton1Click:Connect(function()
+        pcall(callback)
+    end)
     return btn
 end
 
--- ========================
--- TABS & CONTENT
--- ========================
-local tabNames={"Main1","Main2"}
+-- ===== CREATE TABS =====
+local tabNames = {"Main 1","Main 2"}
 local contentFrames={}
 local tabButtons={}
-local currentTab
-
 for i,name in ipairs(tabNames) do
     local btn=createTabButton(name)
     btn.LayoutOrder=i
@@ -127,92 +123,61 @@ for i,name in ipairs(tabNames) do
     contentFrames[name]=fr
 end
 
+local currentTab=nil
 local function showTab(name)
     if currentTab==name then return end
     if currentTab and contentFrames[currentTab] then contentFrames[currentTab].Visible=false end
-    contentFrames[name].Visible=true
+    if contentFrames[name] then contentFrames[name].Visible=true end
     currentTab=name
 end
-
 for name,btn in pairs(tabButtons) do
     btn.MouseButton1Click:Connect(function() showTab(name) end)
 end
+showTab("Main 1")
 
--- ========================
--- MAIN1: Execute
--- ========================
+-- ===== FILL CONTENT =====
+-- Main 1: Execute box
 do
-    local fr=contentFrames["Main1"]
-    local textBox = Instance.new("TextBox")
-    textBox.PlaceholderText="Execute by Dat"
-    textBox.Size=UDim2.new(1,0,0,40)
-    textBox.BackgroundColor3=Color3.fromRGB(36,44,56)
-    textBox.TextColor3=Color3.fromRGB(255,255,255)
-    textBox.Font=Enum.Font.Gotham
-    textBox.TextSize=16
-    textBox.Parent=fr
-    mk(textBox,"UICorner",{CornerRadius=UDim.new(0,6)})
-    createFuncButton(fr,"Run Script",function()
-        local code=textBox.Text
-        if code~="" then
-            local ok,err=pcall(loadstring(code))
-            if not ok then warn("Execute error:",err) end
+    local fr=contentFrames["Main 1"]
+    local execBox = mk(fr,"TextBox",{PlaceholderText="Paste your script here",Size=UDim2.new(1,0,0,40),Text="",Font=Enum.Font.Gotham,TextSize=14,TextColor3=Color3.fromRGB(220,220,255),BackgroundColor3=Color3.fromRGB(40,40,50)})
+    mk(execBox,"UICorner",{CornerRadius=UDim.new(0,6)})
+    createFuncButton(fr,"Execute by Dat","Click to run script",function()
+        if execBox.Text~="" then
+            local ok,err=pcall(function() loadstring(execBox.Text)() end)
+            if not ok then warn("Error execute script:",err) end
         end
     end)
 end
 
--- ========================
--- MAIN2: Fly & Walk on Air
--- ========================
+-- Main 2: Fly & Đi trên không
 do
-    local fr=contentFrames["Main2"]
-
-    -- Fly button
-    local FlyBtn = createFuncButton(fr,"Fly (EzzWin)",function()
-        warn("Fly toggled") -- Bạn có thể chèn Fly code raw ở đây
+    local fr=contentFrames["Main 2"]
+    createFuncButton(fr,"Fly (EzzWin)","Activate Fly script",function()
+        warn("Fly script activated!") -- dán raw URL vào đây nếu muốn
     end)
-
-    -- Walk on Air button
-    local WalkAirBtn = createFuncButton(fr,"Walk on Air",function()
-        warn("Walk on Air toggled") -- Chèn Walk on Air raw
+    createFuncButton(fr,"Đi trên không","Activate WalkOnAir script",function()
+        warn("WalkOnAir script activated!") -- dán raw URL vào đây nếu muốn
     end)
 end
 
--- Set first tab active
-showTab("Main1")
-
--- ========================
--- OPEN/CLOSE MENU
--- ========================
-local OpenBtn = mk(ScreenGui,"ImageButton",{BackgroundColor3=Color3.fromRGB(0,0,0),BackgroundTransparency=0.25,BorderSizePixel=0,Size=UDim2.new(0,48,0,48),Position=UDim2.new(0.06,0,0.12,0),Image="",AutoButtonColor=true,ZIndex=6})
+-- ===== OPEN BUTTON (Avatar) =====
+local OpenBtn = mk(ScreenGui,"ImageButton",{BackgroundColor3=Color3.fromRGB(0,0,0),BackgroundTransparency=0.25,BorderSizePixel=0,Position=UDim2.new(0.06,0,0.12,0),Size=UDim2.new(0,50,0,50),Image="rbxassetid://"..Config.AvatarImageId,ZIndex=6})
 mk(OpenBtn,"UICorner",{CornerRadius=UDim.new(1,10)})
 
-ScreenGui:SetAttribute("MenuOpen",false)
-local function openVisual()
-    Backdrop.Visible=true
-    tween(Backdrop,{BackgroundTransparency=Config.BackdropMaxTransparency},Config.AnimationTime):Play()
-    tween(Window,{Position=UDim2.new(0.5,0,0.5,0)},Config.AnimationTime,Enum.EasingStyle.Back,Enum.EasingDirection.Out):Play()
-end
-local function closeVisual()
-    tween(Backdrop,{BackgroundTransparency=1},Config.AnimationTime):Play()
-    local tw=tween(Window,{Position=UDim2.new(1.2,0,0.5,0)},Config.AnimationTime,Enum.EasingStyle.Back,Enum.EasingDirection.In)
-    tw:Play()
-    tw.Completed:Wait()
-    Backdrop.Visible=false
-end
+local MenuOpen=false
 local function toggleMenu()
-    if ScreenGui:GetAttribute("MenuOpen") then
-        closeVisual()
-        ScreenGui:SetAttribute("MenuOpen",false)
-    else
-        openVisual()
-        ScreenGui:SetAttribute("MenuOpen",true)
-    end
+    MenuOpen=not MenuOpen
+    Backdrop.Visible=MenuOpen
+    tween(Window,{Position=MenuOpen and UDim2.new(0.5,0,0.5,0) or UDim2.new(1.2,0,0.5,0)},Config.AnimationTime):Play()
+    tween(Backdrop,{BackgroundTransparency=MenuOpen and 0.6 or 1},Config.AnimationTime):Play()
 end
-
 OpenBtn.MouseButton1Click:Connect(toggleMenu)
 CloseBtn.MouseButton1Click:Connect(toggleMenu)
-Backdrop.InputBegan:Connect(function(input) if input.UserInputType==Enum.UserInputType.MouseButton1 then toggleMenu() end end)
-UserInputService.InputBegan:Connect(function(input,gpe) if not gpe and input.KeyCode==Enum.KeyCode.End then toggleMenu() end end)
+Backdrop.InputBegan:Connect(function(input)
+    if input.UserInputType==Enum.UserInputType.MouseButton1 and MenuOpen then toggleMenu() end
+end)
+UserInputService.InputBegan:Connect(function(input,gpe)
+    if not gpe and input.KeyCode==Enum.KeyCode.End then toggleMenu() end
+end)
 
-print("Jack Hub v3 loaded.")
+print("JackHub GUI v3 loaded. Click avatar to open menu.")
