@@ -1,129 +1,366 @@
--- 💎 JackUiPremium Dark v3 | Mở menu bằng avatar
--- Author: Jack 💠 | Giao diện viền cong + animation mở/đóng
+-- JackUiPremium Dark v3 (Editable Script Version)
+-- Delta compatible. Click avatar to open. Tabs include a "Scripts" tab with TextBoxes + Run buttons.
+-- SECURITY: This UI does NOT include any external HttpGet/loadstring code by default.
+-- If you paste code into the Script boxes and press Run, the code WILL execute client-side.
+-- Only paste code you trust.
 
 repeat task.wait() until game:IsLoaded()
-wait(1)
+task.wait(0.4)
 
--- ⚙️ Chỗ để bạn dán script thật
-local UserScripts = {
-    Fly = "loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()", -- Dán script Fly của bạn vào đây
-    Invisible = "loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))()", -- Dán script Invisible vào đây
-    WalkOnAir = "loadstring(game:HttpGet("https://pastefy.app/Qc1ZIUwO/raw", true))()", -- Dán script WalkOnAir vào đây
-    InfiniteYield = "loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))()" -- Dán Infinite Yield ở đây
+-- CONFIG
+local Config = {
+    GuiName = "JackUiPremium_v3",
+    AvatarImageId = "103173399598412",
+    WindowWidth = 700,
+    WindowHeight = 420,
+    TextCyan = Color3.fromRGB(155,210,255),
+    AnimationTime = 0.32
 }
 
--- 🪩 GUI chính
+-- SERVICES
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+-- CLEANUP old GUI
+if game.CoreGui:FindFirstChild(Config.GuiName) then
+    pcall(function() game.CoreGui[Config.GuiName]:Destroy() end)
+end
+
+-- ROOT GUI (use CoreGui for Delta compatibility)
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JackUiPremium"
+ScreenGui.Name = Config.GuiName
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.ResetOnSpawn = false
 
--- 🔘 Nút mở menu (Avatar)
-local OpenButton = Instance.new("ImageButton")
-OpenButton.Parent = ScreenGui
-OpenButton.Size = UDim2.new(0, 60, 0, 60)
-OpenButton.Position = UDim2.new(0.05, 0, 0.15, 0)
-OpenButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-OpenButton.BorderSizePixel = 0
-OpenButton.Image = "http://www.roblox.com/asset/?id=103173399598412" -- 👈 đổi ảnh avatar menu tại đây
-OpenButton.AutoButtonColor = true
-OpenButton.Active = true
-
-local UICornerButton = Instance.new("UICorner", OpenButton)
-UICornerButton.CornerRadius = UDim.new(1, 0)
-local UIStrokeButton = Instance.new("UIStroke", OpenButton)
-UIStrokeButton.Color = Color3.fromRGB(155, 210, 255)
-UIStrokeButton.Thickness = 1.2
-
--- 🪞 Menu chính
-local MenuFrame = Instance.new("Frame")
-MenuFrame.Size = UDim2.new(0, 550, 0, 350)
-MenuFrame.Position = UDim2.new(0.5, -275, 0.5, -175)
-MenuFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-MenuFrame.BorderSizePixel = 0
-MenuFrame.Visible = false
-MenuFrame.Active = true
-MenuFrame.Draggable = true
-MenuFrame.ClipsDescendants = true
-MenuFrame.Parent = ScreenGui
-
-local UICornerFrame = Instance.new("UICorner", MenuFrame)
-UICornerFrame.CornerRadius = UDim.new(0, 20)
-local UIStrokeFrame = Instance.new("UIStroke", MenuFrame)
-UIStrokeFrame.Color = Color3.fromRGB(155, 210, 255)
-UIStrokeFrame.Thickness = 1.2
-local UIScale = Instance.new("UIScale", MenuFrame)
-UIScale.Scale = 0
-
--- 💎 Tiêu đề
-local Title = Instance.new("TextLabel")
-Title.Parent = MenuFrame
-Title.Text = "JackUiPremium 💎"
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 24
-Title.TextColor3 = Color3.fromRGB(155, 210, 255)
-Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0, 20, 0, 10)
-Title.Size = UDim2.new(1, -40, 0, 40)
-Title.TextXAlignment = Enum.TextXAlignment.Left
-
--- 🧭 Tabs ngang
-local TabBar = Instance.new("Frame", MenuFrame)
-TabBar.Size = UDim2.new(1, 0, 0, 40)
-TabBar.Position = UDim2.new(0, 0, 0, 55)
-TabBar.BackgroundTransparency = 0.15
-TabBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-local TabCorner = Instance.new("UICorner", TabBar)
-TabCorner.CornerRadius = UDim.new(0, 20)
-local UIListLayout = Instance.new("UIListLayout", TabBar)
-UIListLayout.FillDirection = Enum.FillDirection.Horizontal
-UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIListLayout.Padding = UDim.new(0, 8)
-
--- 🎚️ Tabs mẫu
-local Tabs = {"Main 1", "Main 2", "Main 3", "Main 4"}
-for _, name in pairs(Tabs) do
-    local Button = Instance.new("TextButton")
-    Button.Text = name
-    Button.Parent = TabBar
-    Button.Font = Enum.Font.Gotham
-    Button.TextSize = 18
-    Button.TextColor3 = Color3.fromRGB(155, 210, 255)
-    Button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Button.Size = UDim2.new(0, 100, 1, -10)
-    Button.AutoButtonColor = true
-    Button.BackgroundTransparency = 0.2
-    local BC = Instance.new("UICorner", Button)
-    BC.CornerRadius = UDim.new(0, 12)
+local function mk(parent, class, props)
+    local o = Instance.new(class)
+    if props then
+        for k,v in pairs(props) do
+            if type(k) == "string" then pcall(function() o[k] = v end) end
+        end
+    end
+    o.Parent = parent
+    return o
 end
 
--- 🎞️ Animation mở/đóng
-local TweenService = game:GetService("TweenService")
-local menuOpen = false
+-- BACKDROP (dark fade)
+local Backdrop = mk(ScreenGui, "Frame", {
+    Name = "Backdrop",
+    Size = UDim2.new(1,0,1,0),
+    Position = UDim2.new(0,0,0,0),
+    BackgroundColor3 = Color3.new(0,0,0),
+    BackgroundTransparency = 1,
+    ZIndex = 1,
+    Visible = false
+})
 
-local function ToggleMenu()
-	menuOpen = not menuOpen
-	local tween = TweenService:Create(
-		UIScale,
-		TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
-		{Scale = menuOpen and 1 or 0}
-	)
-	tween:Play()
-	if menuOpen then
-		MenuFrame.Visible = true
-	else
-		task.delay(0.4, function()
-			if not menuOpen then
-				MenuFrame.Visible = false
-			end
-		end)
-	end
+-- WINDOW container (start offscreen)
+local Window = mk(ScreenGui, "Frame", {
+    Name = "Window",
+    AnchorPoint = Vector2.new(0.5,0.5),
+    Size = UDim2.new(0, Config.WindowWidth, 0, Config.WindowHeight),
+    Position = UDim2.new(1.3, 0, 0.5, 0),
+    BackgroundColor3 = Color3.fromRGB(18,22,28),
+    ZIndex = 50,
+    ClipsDescendants = true
+})
+mk(Window, "UICorner", {CornerRadius = UDim.new(0,18)})
+mk(Window, "UIStroke", {Color = Config.TextCyan, Thickness = 1.1, Transparency = 0.65})
+
+-- INNER frame
+local Inner = mk(Window, "Frame", {BackgroundTransparency = 1, Size = UDim2.new(1,0,1,0)})
+
+-- TITLE BAR
+local TitleBar = mk(Inner, "Frame", {Size = UDim2.new(1,0,0,62), BackgroundTransparency = 1, Position = UDim2.new(0,0,0,0)})
+local Title = mk(TitleBar, "TextLabel", {
+    Text = "JackUiPremium 💎",
+    Font = Enum.Font.GothamBold,
+    TextSize = 20,
+    TextColor3 = Config.TextCyan,
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0.03,0,0.08,0),
+    Size = UDim2.new(0.6,0,0.9,0),
+    TextXAlignment = Enum.TextXAlignment.Left
+})
+local SubTitle = mk(TitleBar, "TextLabel", {
+    Text = "Dark editable script UI",
+    Font = Enum.Font.Gotham,
+    TextSize = 12,
+    TextColor3 = Color3.fromRGB(130,180,200),
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0.03,0,0.52,0),
+    Size = UDim2.new(0.6,0,0.4,0),
+    TextXAlignment = Enum.TextXAlignment.Left
+})
+local CloseBtn = mk(TitleBar, "TextButton", {
+    Text = "✕", Font = Enum.Font.GothamBold, TextSize = 18, TextColor3 = Config.TextCyan,
+    BackgroundColor3 = Color3.fromRGB(36,42,52), Size = UDim2.new(0,40,0,40), Position = UDim2.new(0.93,0,0.08,0),
+    AutoButtonColor = true
+})
+mk(CloseBtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+
+-- TABS (horizontal)
+local TabsBar = mk(Inner, "Frame", {Position = UDim2.new(0, 12, 0, 64), Size = UDim2.new(1, -24, 0, 48), BackgroundTransparency = 0})
+mk(TabsBar, "UICorner", {CornerRadius = UDim.new(0,12)})
+local TabsLayout = mk(TabsBar, "UIListLayout", {FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0,10), HorizontalAlignment = Enum.HorizontalAlignment.Left})
+
+-- CONTENT area
+local Content = mk(Inner, "Frame", {Position = UDim2.new(0,12,0,120), Size = UDim2.new(1,-24,1,-132), BackgroundTransparency = 1})
+mk(Content, "UIListLayout", {Padding = UDim.new(0,8), FillDirection = Enum.FillDirection.Vertical})
+
+-- Create tabs and panels
+local tabNames = {"Main","Troll","Fun","Game","Admin","Scripts"}
+local tabs = {}
+local panels = {}
+
+for i, name in ipairs(tabNames) do
+    local tbtn = mk(TabsBar, "TextButton", {
+        Text = name, Font = Enum.Font.Gotham, TextSize = 14,
+        Size = UDim2.new(0,110,1,-8), BackgroundColor3 = Color3.fromRGB(30,36,44),
+        AutoButtonColor = true, TextColor3 = Config.TextCyan
+    })
+    mk(tbtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+    tabs[name] = tbtn
+
+    local panel = mk(Content, "Frame", {Name = "Panel_"..name, BackgroundTransparency = 1, Size = UDim2.new(1,0,0,0), Visible = false})
+    mk(panel, "UIListLayout", {Padding = UDim.new(0,8), FillDirection = Enum.FillDirection.Vertical, VerticalAlignment = Enum.VerticalAlignment.Top})
+    panels[name] = panel
 end
 
--- 🔘 Click vào avatar để mở/đóng menu
-OpenButton.MouseButton1Click:Connect(function()
-	ToggleMenu()
+-- Utility: create functional button in panels
+local function createFuncButton(parent, title, desc, cb)
+    local btn = mk(parent, "TextButton", {Size = UDim2.new(1,0,0,46), BackgroundColor3 = Color3.fromRGB(36,44,56), AutoButtonColor = true, Text = ""})
+    mk(btn, "UICorner", {CornerRadius = UDim.new(0,10)})
+    mk(btn, "TextLabel", {Text = title, Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Config.TextCyan, BackgroundTransparency = 1, Position = UDim2.new(0.03,0,0,0), Size = UDim2.new(0.6,0,1,0), TextXAlignment = Enum.TextXAlignment.Left})
+    mk(btn, "TextLabel", {Text = desc, Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(150,170,190), BackgroundTransparency = 1, Position = UDim2.new(0.03,0,0.5,0), Size = UDim2.new(0.95,0,0.5,0), TextXAlignment = Enum.TextXAlignment.Left})
+    btn.MouseButton1Click:Connect(function()
+        tween = TweenService:Create(btn, TweenInfo.new(0.08), {BackgroundColor3 = Color3.fromRGB(56,64,76)}); tween:Play()
+        task.delay(0.12, function() TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(36,44,56)}):Play() end)
+        if cb then
+            local ok, err = pcall(cb)
+            if not ok then warn("[JackUiPremium] Button callback error:", err) end
+        end
+    end)
+    return btn
+end
+
+-- Populate Main tab
+do
+    local p = panels["Main"]
+    createFuncButton(p, "Copy TikTok", "Sao chép link TikTok", function() pcall(setclipboard, "https://www.tiktok.com/@your_tiktok_here") end)
+    createFuncButton(p, "Copy Discord", "Sao chép invite Discord", function() pcall(setclipboard, "https://discord.gg/your_invite_here") end)
+    createFuncButton(p, "Server Hop (placeholder)", "Dán script server hop vào Scripts tab để chạy", function() warn("Server Hop placeholder") end)
+end
+
+-- Populate Troll tab
+do
+    local p = panels["Troll"]
+    createFuncButton(p, "Fake Lag (local)", "Hiệu ứng giả lag local", function() for i=1,5 do task.wait() end; warn("Fake lag done") end)
+    createFuncButton(p, "Float Local (2s)", "Neo HRP (local demo)", function()
+        local plr = game.Players.LocalPlayer
+        if plr and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = plr.Character.HumanoidRootPart
+            local old = hrp.Anchored
+            hrp.Anchored = true
+            task.delay(2, function() hrp.Anchored = old end)
+        end
+    end)
+end
+
+-- Populate Fun tab
+do
+    local p = panels["Fun"]
+    createFuncButton(p, "Fly (placeholder)", "Dán mã Fly vào Scripts tab -> Fly", function() warn("Fly placeholder - use Scripts tab") end)
+    createFuncButton(p, "Invisible (placeholder)", "Dán mã Invisible vào Scripts tab -> Invisible", function() warn("Invisible placeholder - use Scripts tab") end)
+    createFuncButton(p, "WalkOnAir (placeholder)", "Dán mã WalkOnAir vào Scripts tab -> WalkOnAir", function() warn("WalkOnAir placeholder - use Scripts tab") end)
+end
+
+-- Populate Game tab
+do
+    local p = panels["Game"]
+    createFuncButton(p, "Blox Fruits (placeholder)", "Dán script vào Scripts tab", function() warn("Blox Fruits placeholder") end)
+    createFuncButton(p, "Da Hood (placeholder)", "Dán script vào Scripts tab", function() warn("Da Hood placeholder") end)
+end
+
+-- Populate Admin tab
+do
+    local p = panels["Admin"]
+    createFuncButton(p, "Infinite Yield (placeholder)", "Dán mã InfiniteYield vào Scripts tab -> InfiniteYield", function() warn("InfiniteYield placeholder - use Scripts tab") end)
+    createFuncButton(p, "FE Admin (placeholder)", "Dán mã FE Admin vào Scripts tab -> FEAdmin", function() warn("FE Admin placeholder - use Scripts tab") end)
+end
+
+-- ========== SCRIPTS TAB ==========
+local scriptsPanel = panels["Scripts"]
+
+-- helper to create labeled TextBox + Run button
+local function createScriptBox(parent, labelText, placeholder)
+    local container = mk(parent, "Frame", {Size = UDim2.new(1,0,0,140), BackgroundTransparency = 1})
+    mk(container, "UIListLayout", {Padding = UDim.new(0,6)})
+    local label = mk(container, "TextLabel", {Text = labelText, Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Config.TextCyan, BackgroundTransparency = 1, Size = UDim2.new(1,0,0,18)})
+    local box = mk(container, "TextBox", {
+        Text = placeholder or "",
+        Font = Enum.Font.Gotham, TextSize = 14, TextColor3 = Color3.fromRGB(230,230,240),
+        BackgroundColor3 = Color3.fromRGB(28,32,38), Size = UDim2.new(1,0,0,88), ClearTextOnFocus = false, MultiLine = true, TextWrapped = true
+    })
+    mk(box, "UICorner", {CornerRadius = UDim.new(0,8)})
+    local btnRow = mk(container, "Frame", {Size = UDim2.new(1,0,0,30), BackgroundTransparency = 1})
+    local runBtn = mk(btnRow, "TextButton", {Text = "Run", Size = UDim2.new(0,100,1,0), Position = UDim2.new(0,0,0,0), BackgroundColor3 = Color3.fromRGB(36,44,56), AutoButtonColor = true})
+    mk(runBtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+    local saveBtn = mk(btnRow, "TextButton", {Text = "Save", Size = UDim2.new(0,100,1,0), Position = UDim2.new(0,110,0,0), BackgroundColor3 = Color3.fromRGB(36,44,56), AutoButtonColor = true})
+    mk(saveBtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+    local status = mk(btnRow, "TextLabel", {Text = "", BackgroundTransparency = 1, Position = UDim2.new(0.65,0,0,0), Size = UDim2.new(0.35,0,1,0), TextColor3 = Color3.fromRGB(180,180,200), Font = Enum.Font.Gotham, TextSize = 12})
+
+    return {
+        container = container,
+        box = box,
+        runBtn = runBtn,
+        saveBtn = saveBtn,
+        status = status
+    }
+end
+
+-- We'll keep saved code in memory table; not persistent across sessions
+local SavedScripts = {
+    Fly = "",
+    Invisible = "",
+    WalkOnAir = "",
+    InfiniteYield = ""
+}
+
+-- Create boxes
+local flyBox = createScriptBox(scriptsPanel, "Fly (paste Lua code here)", "paste fly code here...")
+local invisibleBox = createScriptBox(scriptsPanel, "Invisible (paste Lua code here)", "paste invisible code here...")
+local walkBox = createScriptBox(scriptsPanel, "WalkOnAir (paste Lua code here)", "paste walkonair code here...")
+local infyBox = createScriptBox(scriptsPanel, "InfiniteYield (paste Lua code here)", "paste infinite yield code here...")
+
+-- helper to run code safely (pcall + loadstring)
+local function runUserCode(code, statusLabel)
+    if not code or code:match("^%s*$") then
+        statusLabel.Text = "No code to run."
+        return
+    end
+    -- Warn user in Output
+    warn("[JackUiPremium] Running user code - you are responsible for this code.")
+    local fn, loadErr = loadstring(code)
+    if not fn then
+        statusLabel.Text = "Load error: "..tostring(loadErr)
+        warn("[JackUiPremium] loadstring error:", loadErr)
+        return
+    end
+    local ok, res = pcall(fn)
+    if not ok then
+        statusLabel.Text = "Runtime error: "..tostring(res)
+        warn("[JackUiPremium] runtime error:", res)
+        return
+    end
+    statusLabel.Text = "Executed successfully."
+end
+
+-- Wire run/save actions
+flyBox.runBtn.MouseButton1Click:Connect(function()
+    flyBox.status.Text = "Running..."
+    runUserCode(flyBox.box.Text, flyBox.status)
+end)
+flyBox.saveBtn.MouseButton1Click:Connect(function()
+    SavedScripts.Fly = flyBox.box.Text
+    flyBox.status.Text = "Saved in memory."
 end)
 
-print("✅ JackUiPremium v3 loaded — Click vào avatar để mở menu 💎")
+invisibleBox.runBtn.MouseButton1Click:Connect(function()
+    invisibleBox.status.Text = "Running..."
+    runUserCode(invisibleBox.box.Text, invisibleBox.status)
+end)
+invisibleBox.saveBtn.MouseButton1Click:Connect(function()
+    SavedScripts.Invisible = invisibleBox.box.Text
+    invisibleBox.status.Text = "Saved in memory."
+end)
+
+walkBox.runBtn.MouseButton1Click:Connect(function()
+    walkBox.status.Text = "Running..."
+    runUserCode(walkBox.box.Text, walkBox.status)
+end)
+walkBox.saveBtn.MouseButton1Click:Connect(function()
+    SavedScripts.WalkOnAir = walkBox.box.Text
+    walkBox.status.Text = "Saved in memory."
+end)
+
+infyBox.runBtn.MouseButton1Click:Connect(function()
+    infyBox.status.Text = "Running..."
+    runUserCode(infyBox.box.Text, infyBox.status)
+end)
+infyBox.saveBtn.MouseButton1Click:Connect(function()
+    SavedScripts.InfiniteYield = infyBox.box.Text
+    infyBox.status.Text = "Saved in memory."
+end)
+
+-- Add small helpers: load saved into boxes if any
+flyBox.box.Text = SavedScripts.Fly
+invisibleBox.box.Text = SavedScripts.Invisible
+walkBox.box.Text = SavedScripts.WalkOnAir
+infyBox.box.Text = SavedScripts.InfiniteYield
+
+-- Activate first tab
+local currentTab = nil
+local function showTab(name)
+    for k,v in pairs(panels) do v.Visible = (k == name) end
+    currentTab = name
+end
+showTab("Main")
+
+-- Connect tab buttons
+for name, btn in pairs(tabs) do
+    btn.MouseButton1Click:Connect(function()
+        showTab(name)
+    end)
+end
+
+-- AVATAR OPEN BUTTON (click to open)
+local AvatarBtn = mk(ScreenGui, "ImageButton", {
+    Name = "AvatarOpen",
+    Size = UDim2.new(0,64,0,64),
+    Position = UDim2.new(0.035,0,0.12,0),
+    BackgroundColor3 = Color3.fromRGB(28,28,32),
+    Image = "http://www.roblox.com/asset/?id="..tostring(Config.AvatarImageId),
+    AutoButtonColor = true,
+    ZIndex = 999
+})
+mk(AvatarBtn, "UICorner", {CornerRadius = UDim.new(1,0)})
+mk(AvatarBtn, "UIStroke", {Color = Config.TextCyan, Thickness = 1.1})
+
+-- Sound feedback (optional)
+local clickSound = mk(AvatarBtn, "Sound", {SoundId = "rbxassetid://9118823101", Volume = 0.9})
+
+local opened = false
+local function openMenu()
+    if opened then return end
+    opened = true
+    Backdrop.Visible = true
+    tween = TweenService:Create(Backdrop, TweenInfo.new(Config.AnimationTime), {BackgroundTransparency = 0.5}); tween:Play()
+    Window.Visible = true
+    TweenService:Create(Window, TweenInfo.new(0.36, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(0.5,0,0.5,0)}):Play()
+end
+local function closeMenu()
+    if not opened then return end
+    opened = false
+    TweenService:Create(Backdrop, TweenInfo.new(Config.AnimationTime), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(Window, TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(1.3,0,0.5,0)}):Play()
+    task.delay(0.32, function() Backdrop.Visible = false; Window.Visible = false end)
+end
+
+AvatarBtn.MouseButton1Click:Connect(function()
+    pcall(function() clickSound:Play() end)
+    if opened then closeMenu() else openMenu() end
+end)
+
+-- Close button
+CloseBtn.MouseButton1Click:Connect(function() if opened then closeMenu() end end)
+
+-- Backdrop click to close
+Backdrop.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 and opened then closeMenu() end end)
+
+-- Keyboard fallback (G)
+UserInputService.InputBegan:Connect(function(input, gp) if not gp and input.KeyCode == Enum.KeyCode.G then if opened then closeMenu() else openMenu() end end end)
+
+-- Final prints
+print("[JackUiPremium] GUI loaded (v3). Click avatar to open. Use the Scripts tab to paste your own Lua and press Run.")
+warn("[JackUiPremium] SECURITY: Running pasted code is your responsibility. Do NOT paste code you don't trust.")
