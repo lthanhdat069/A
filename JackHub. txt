@@ -1,236 +1,500 @@
---- JackUiPremium Dark Fade v3
--- Click avatar góc phải trên để bật/tắt menu
--- Tabs ngang + chữ xanh nhạt, viền cong, fade mượt
--- Sol built
+-- JackUiPremium Dark Fade v3 — Safe Aimbot helper (NO auto-fetch/run)
+-- Avatar: right-top. Click avatar to open/close. Fade open/close.
+-- Adds Aimbot helper: copies raw URL to clipboard and provides Aimbot paste box + Confirm-before-Run.
+-- IMPORTANT: This script WILL NOT auto-fetch and execute remote aimbot URLs.
+-- To run aimbot code you MUST copy the raw Lua into the Aimbot box and confirm Run yourself.
 
 repeat task.wait() until game:IsLoaded()
+task.wait(0.2)
 
--- ========================
 -- CONFIG
--- ========================
 local Config = {
-    GuiName = "JackUiPremiumDark_v3",
-    AvatarButtonId = "103173399598412", -- ID mặc định cho avatar
-    WindowTitle = "Jack Hub 💎",
-    WindowSubTitle = "Script vip xịn nhất từ Jack",
-    ThemeColor = Color3.fromRGB(40,45,55), -- màu Dark
-    TextColor = Color3.fromRGB(155,210,255), -- chữ xanh nhạt
-    WindowWidth = 650,
-    WindowHeight = 400,
-    TabHeight = 48,
-    FadeTime = 0.28,
-    CornerRadius = 12
+    GuiName = "JackUiPremiumDark_v3_safe",
+    AvatarButtonId = "103173399598412", -- default avatar image id
+    WindowTitle = "JackUiPremium Dark 💎",
+    WindowSubTitle = "Fade UI — Skill Mode (safe helper)",
+    WindowWidth = 820,
+    WindowHeight = 520,
+    TextCyan = Color3.fromRGB(155,210,255),
+    ThemeColor = Color3.fromRGB(18,22,28),
+    FadeTime = 0.32,
+    CornerRadius = 14
 }
 
--- ========================
--- RAW SCRIPT PLACEHOLDERS
--- ========================
-local UserScripts = {
-    Fly = "",        -- dán raw URL Fly Skill
-    Invisible = ""   -- dán raw URL Invisible Skill
-}
-
--- ========================
 -- SERVICES
--- ========================
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
--- ========================
+-- CLEANUP
+if CoreGui:FindFirstChild(Config.GuiName) then
+    pcall(function() CoreGui[Config.GuiName]:Destroy() end)
+end
+
 -- UTILS
--- ========================
 local function mk(parent, class, props)
-    local obj = Instance.new(class)
-    if props then for k,v in pairs(props) do obj[k] = v end end
-    obj.Parent = parent
-    return obj
+    local o = Instance.new(class)
+    if props then
+        for k,v in pairs(props) do
+            pcall(function() o[k] = v end)
+        end
+    end
+    o.Parent = parent
+    return o
+end
+local function tween(obj, props, t, style, dir)
+    style = style or Enum.EasingStyle.Quad
+    dir = dir or Enum.EasingDirection.Out
+    local tw = TweenService:Create(obj, TweenInfo.new(t or Config.FadeTime, style, dir), props)
+    tw:Play()
+    return tw
 end
 
-local function tween(obj, props, t)
-    return TweenService:Create(obj, TweenInfo.new(t or Config.FadeTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), props)
-end
-
-local function safeLoad(url)
-    if url == "" or not url then warn("Chưa có URL script."); return false end
-    local ok, res = pcall(function() return loadstring(game:HttpGet(url, true))() end)
-    if not ok then warn("Script lỗi:", res) end
-    return ok
-end
-
--- ========================
--- CLEANUP OLD GUI
--- ========================
-if CoreGui:FindFirstChild(Config.GuiName) then CoreGui[Config.GuiName]:Destroy() end
-
--- ========================
--- MAIN SCREEN GUI
--- ========================
-local ScreenGui = mk(CoreGui, "ScreenGui",{Name = Config.GuiName, ResetOnSpawn=false,ZIndexBehavior=Enum.ZIndexBehavior.Sibling})
+-- ROOT GUI
+local ScreenGui = mk(CoreGui, "ScreenGui", {Name = Config.GuiName, ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling})
 
 -- BACKDROP
-local Backdrop = mk(ScreenGui,"Frame",{
+local Backdrop = mk(ScreenGui, "Frame", {
+    Name = "Backdrop",
+    Size = UDim2.new(1,0,1,0),
+    Position = UDim2.new(0,0,0,0),
     BackgroundColor3 = Color3.new(0,0,0),
     BackgroundTransparency = 1,
-    Size=UDim2.new(1,0,1,0),
-    ZIndex=1,
-    Visible=false
+    Visible = false,
+    ZIndex = 50
 })
 
--- MAIN WINDOW
-local Window = mk(ScreenGui,"Frame",{
-    Size=UDim2.new(0,Config.WindowWidth,0,Config.WindowHeight),
-    Position=UDim2.new(0.5,0,-1,0), -- ban đầu offscreen trên
-    AnchorPoint=Vector2.new(0.5,0.5),
-    BackgroundColor3=Config.ThemeColor,
-    ZIndex=2
-})
-mk(Window,"UICorner",{CornerRadius=UDim.new(0,Config.CornerRadius)})
-
--- TITLE
-local Title = mk(Window,"TextLabel",{
-    Text=Config.WindowTitle,
-    Font=Enum.Font.GothamBold,
-    TextSize=20,
-    TextColor3=Config.TextColor,
-    BackgroundTransparency=1,
-    Position=UDim2.new(0.03,0,0.02,0),
-    Size=UDim2.new(0.7,0,0.15,0),
-    TextXAlignment=Enum.TextXAlignment.Left
-})
-local SubTitle = mk(Window,"TextLabel",{
-    Text=Config.WindowSubTitle,
-    Font=Enum.Font.Gotham,
-    TextSize=12,
-    TextColor3=Config.TextColor,
-    BackgroundTransparency=1,
-    Position=UDim2.new(0.03,0,0.18,0),
-    Size=UDim2.new(0.7,0,0.1,0),
-    TextXAlignment=Enum.TextXAlignment.Left
-})
-
--- CLOSE BUTTON
-local CloseBtn = mk(Window,"TextButton",{
-    Text="X",
-    Font=Enum.Font.GothamBold,
-    TextSize=16,
-    TextColor3=Config.TextColor,
-    BackgroundColor3=Color3.fromRGB(50,50,60),
-    Position=UDim2.new(0.94,0,0.02,0),
-    Size=UDim2.new(0,30,0,30)
-})
-mk(CloseBtn,"UICorner",{CornerRadius=UDim.new(0,6)})
-
--- TABS
-local TabsBar = mk(Window,"Frame",{
-    BackgroundTransparency=1,
-    Position=UDim2.new(0,0,0.3,0),
-    Size=UDim2.new(1,0,0,Config.TabHeight)
-})
-local TabsLayout = mk(TabsBar,"UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,SortOrder=Enum.SortOrder.LayoutOrder,Padding=UDim.new(0,6)})
-
-local ContentContainer = mk(Window,"Frame",{
-    BackgroundTransparency=1,
-    Position=UDim2.new(0,12,0.3+Config.TabHeight/Config.WindowHeight,0),
-    Size=UDim2.new(1,-24,1,-(Config.TabHeight+54))
-})
-
-local function createTabButton(name)
-    local btn = mk(TabsBar,"TextButton",{Size=UDim2.new(0,110,0,Config.TabHeight),Text=name,Font=Enum.Font.Gotham,TextColor3=Config.TextColor,BackgroundColor3=Color3.fromRGB(30,36,45)})
-    mk(btn,"UICorner",{CornerRadius=UDim.new(0,8)})
-    return btn
+-- Optional blur effect (non-invasive)
+local Lighting = game:GetService("Lighting")
+local blur = Lighting:FindFirstChild("JackUiPremium_Blur")
+if not blur then
+    blur = Instance.new("BlurEffect")
+    blur.Name = "JackUiPremium_Blur"
+    blur.Size = 0
+    blur.Enabled = false
+    blur.Parent = Lighting
 end
 
+-- WINDOW (center)
+local Window = mk(ScreenGui, "Frame", {
+    Name = "Window",
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    Size = UDim2.new(0, Config.WindowWidth, 0, Config.WindowHeight),
+    Position = UDim2.new(0.5, 0, 0.45, 0),
+    BackgroundColor3 = Config.ThemeColor,
+    BackgroundTransparency = 1, -- start hidden (faded)
+    Visible = false,
+    ZIndex = 60,
+    ClipsDescendants = true
+})
+mk(Window, "UICorner", {CornerRadius = UDim.new(0, Config.CornerRadius)})
+mk(Window, "UIStroke", {Color = Config.TextCyan, Thickness = 1, Transparency = 0.6})
+
+-- INNER
+local Inner = mk(Window, "Frame", {BackgroundTransparency = 1, Size = UDim2.new(1,0,1,0)})
+
+-- TITLE BAR
+local TitleBar = mk(Inner, "Frame", {Size = UDim2.new(1,0,0,72), BackgroundTransparency = 1})
+mk(TitleBar, "TextLabel", {
+    Text = Config.WindowTitle, Font = Enum.Font.GothamBold, TextSize = 20,
+    TextColor3 = Config.TextCyan, BackgroundTransparency = 1,
+    Position = UDim2.new(0.03,0,0.12,0), Size = UDim2.new(0.6,0,0.85,0), TextXAlignment = Enum.TextXAlignment.Left
+})
+mk(TitleBar, "TextLabel", {
+    Text = Config.WindowSubTitle, Font = Enum.Font.Gotham, TextSize = 12,
+    TextColor3 = Color3.fromRGB(170,190,210), BackgroundTransparency = 1,
+    Position = UDim2.new(0.03,0,0.54,0), Size = UDim2.new(0.6,0,0.36,0), TextXAlignment = Enum.TextXAlignment.Left
+})
+local CloseBtn = mk(TitleBar, "TextButton", {
+    Text = "✕", Font = Enum.Font.GothamBold, TextSize = 18, TextColor3 = Config.TextCyan,
+    BackgroundColor3 = Color3.fromRGB(36,42,52), Size = UDim2.new(0,44,0,44), Position = UDim2.new(0.93,0,0.12,0),
+    AutoButtonColor = true
+})
+mk(CloseBtn, "UICorner", {CornerRadius = UDim.new(0,10)})
+
+-- TABS BAR
+local TabsBar = mk(Inner, "Frame", {Position = UDim2.new(0,16,0,80), Size = UDim2.new(1,-32,0,50)})
+mk(TabsBar, "UICorner", {CornerRadius = UDim.new(0,10)})
+local TabsLayout = mk(TabsBar, "UIListLayout", {FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0,10), HorizontalAlignment = Enum.HorizontalAlignment.Left})
+
+-- CONTENT area
+local Content = mk(Inner, "Frame", {Position = UDim2.new(0,16,0,148), Size = UDim2.new(1,-32,1,-168), BackgroundTransparency = 1})
+mk(Content, "UIListLayout", {Padding = UDim.new(0,8), FillDirection = Enum.FillDirection.Vertical})
+
+-- Tabs + panels
 local tabNames = {"Main","Skill","Info","Settings"}
-local tabButtons = {}
-local contentFrames = {}
+local tabs = {}
+local panels = {}
+
 for i,name in ipairs(tabNames) do
-    local btn = createTabButton(name)
-    btn.LayoutOrder = i
-    tabButtons[name] = btn
-    local fr = mk(ContentContainer,"Frame",{BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Visible=false})
-    mk(fr,"UIListLayout",{FillDirection=Enum.FillDirection.Vertical,VerticalAlignment=Enum.VerticalAlignment.Top,Padding=UDim.new(0,8)})
-    contentFrames[name] = fr
+    local tbtn = mk(TabsBar, "TextButton", {
+        Text = name, Font = Enum.Font.Gotham, TextSize = 14,
+        Size = UDim2.new(0,120,1, -8), BackgroundColor3 = Color3.fromRGB(30,36,44),
+        AutoButtonColor = true, TextColor3 = Config.TextCyan
+    })
+    mk(tbtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+    tabs[name] = tbtn
+
+    local panel = mk(Content, "Frame", {Name = "Panel_"..name, BackgroundTransparency = 1, Size = UDim2.new(1,0,0,0), Visible = false})
+    mk(panel, "UIListLayout", {Padding = UDim.new(0,8), FillDirection = Enum.FillDirection.Vertical, VerticalAlignment = Enum.VerticalAlignment.Top})
+    panels[name] = panel
 end
 
+-- Show tab function
 local currentTab = nil
 local function showTab(name)
-    if currentTab then contentFrames[currentTab].Visible=false end
-    contentFrames[name].Visible=true
-    currentTab=name
+    for k,v in pairs(panels) do v.Visible = false end
+    panels[name].Visible = true
+    currentTab = name
 end
+showTab("Main")
 
-for name,btn in pairs(tabButtons) do
+for name, btn in pairs(tabs) do
     btn.MouseButton1Click:Connect(function() showTab(name) end)
 end
 
-showTab("Main")
-
--- FUNCTION BUTTON UTILS
-local function createFuncButton(parent,title,desc,callback)
-    local btn = mk(parent,"TextButton",{Text="",BackgroundColor3=Color3.fromRGB(36,44,56),Size=UDim2.new(1,0,0,44)})
-    mk(btn,"UICorner",{CornerRadius=UDim.new(0,8)})
-    local t = mk(btn,"TextLabel",{Text=title,TextColor3=Config.TextColor,Font=Enum.Font.GothamBold,TextSize=16,BackgroundTransparency=1,Position=UDim2.new(0.03,0,0,0),Size=UDim2.new(0.6,0,1,0),TextXAlignment=Enum.TextXAlignment.Left})
-    local d = mk(btn,"TextLabel",{Text=desc,TextColor3=Config.TextColor,Font=Enum.Font.Gotham,TextSize=12,BackgroundTransparency=1,Position=UDim2.new(0.03,0,0.5,0),Size=UDim2.new(0.95,0,0.5,0),TextXAlignment=Enum.TextXAlignment.Left})
+-- Simple button creator
+local function createButton(parent, title, desc, cb)
+    local btn = mk(parent, "TextButton", {Size = UDim2.new(1,0,0,46), BackgroundColor3 = Color3.fromRGB(36,44,56), AutoButtonColor = true, Text = ""})
+    mk(btn, "UICorner", {CornerRadius = UDim.new(0,8)})
+    mk(btn, "TextLabel", {Text = title, Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Config.TextCyan, BackgroundTransparency = 1, Position = UDim2.new(0.03,0,0,0), Size = UDim2.new(0.6,0,1,0), TextXAlignment = Enum.TextXAlignment.Left})
+    mk(btn, "TextLabel", {Text = desc, Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(170,180,200), BackgroundTransparency = 1, Position = UDim2.new(0.03,0,0.5,0), Size = UDim2.new(0.95,0,0.5,0), TextXAlignment = Enum.TextXAlignment.Left})
     btn.MouseButton1Click:Connect(function()
-        tween(btn,{BackgroundColor3=Color3.fromRGB(50,60,76)},0.08):Play()
-        task.delay(0.08,function() tween(btn,{BackgroundColor3=Color3.fromRGB(36,44,56)},0.12):Play() end)
-        pcall(callback)
+        tween(btn, {BackgroundColor3 = Color3.fromRGB(56,64,76)}, 0.08)
+        task.delay(0.12, function() tween(btn, {BackgroundColor3 = Color3.fromRGB(36,44,56)}, 0.12) end)
+        if cb then pcall(cb) end
     end)
     return btn
 end
 
--- ========================
--- FILL CONTENT
--- ========================
--- Skill tab
+-- ===============
+-- MAIN tab content
+-- ===============
 do
-    local fr = contentFrames["Skill"]
-    createFuncButton(fr,"Fly Skill","Chỗ để dán raw Fly Skill",function()
-        safeLoad(UserScripts.Fly)
-    end)
-    createFuncButton(fr,"Invisible Skill","Chỗ để dán raw Invisible Skill",function()
-        safeLoad(UserScripts.Invisible)
-    end)
+    local p = panels["Main"]
+    createButton(p, "Copy TikTok", "Sao chép link TikTok", function() pcall(setclipboard, "https://www.tiktok.com/@your_tiktok_here") end)
+    createButton(p, "Copy Discord", "Sao chép invite Discord", function() pcall(setclipboard, "https://discord.gg/your_invite_here") end)
+    createButton(p, "Open Skill Tab", "Nhan nhanh tới Skill", function() showTab("Skill") end)
 end
 
--- ========================
--- OPEN/CLOSE MENU
--- ========================
-local AvatarBtn = mk(ScreenGui,"ImageButton",{
-    Size=UDim2.new(0,48,0,48),
-    Position=UDim2.new(1,-60,0,10), -- phải trên
-    BackgroundColor3=Color3.fromRGB(0,0,0),
-    BackgroundTransparency=0.25,
-    BorderSizePixel=0,
-    Image="http://www.roblox.com/asset/?id="..Config.AvatarButtonId
-})
-mk(AvatarBtn,"UICorner",{CornerRadius=UDim.new(1,10)})
+-- ===============
+-- SKILL tab content (includes Fly, Invisible, Aimbot helper)
+-- ===============
+do
+    local p = panels["Skill"]
+    -- Header
+    mk(p, "TextLabel", {Text = "Skill controls (client helper). Use Aimbot helper to copy URL then paste raw code into the box below.", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(180,180,200), BackgroundTransparency = 1, Size = UDim2.new(1,0,0,20)})
 
-local menuOpen = false
-local function openMenu()
-    Backdrop.Visible=true
-    tween(Backdrop,{BackgroundTransparency=0.6},Config.FadeTime):Play()
-    tween(Window,{Position=UDim2.new(0.5,0,0.5,0)},Config.FadeTime):Play()
-end
-local function closeMenu()
-    tween(Backdrop,{BackgroundTransparency=1},Config.FadeTime):Play()
-    tween(Window,{Position=UDim2.new(0.5,0,-1,0)},Config.FadeTime):Play()
-    task.delay(Config.FadeTime,function() Backdrop.Visible=false end)
-end
-AvatarBtn.MouseButton1Click:Connect(function()
-    if menuOpen then closeMenu() else openMenu() end
-    menuOpen = not menuOpen
-end)
-CloseBtn.MouseButton1Click:Connect(function()
-    closeMenu()
-    menuOpen=false
-end)
-Backdrop.InputBegan:Connect(function(input)
-    if input.UserInputType==Enum.UserInputType.MouseButton1 and menuOpen then
-        closeMenu()
-        menuOpen=false
+    -- Fly (demo + paste box)
+    mk(p, "TextLabel", {Text = "Fly (demo / paste-run)", Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Config.TextCyan, BackgroundTransparency = 1, Size = UDim2.new(1,0,0,18)})
+    local flyRow = mk(p, "Frame", {Size = UDim2.new(1,0,0,40), BackgroundTransparency = 1})
+    mk(flyRow, "UIListLayout", {FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0,8)})
+    local flyOn = mk(flyRow, "TextButton", {Text = "ON Fly (demo)", Size = UDim2.new(0,140,1,0), BackgroundColor3 = Color3.fromRGB(36,44,56)})
+    mk(flyOn, "UICorner", {CornerRadius = UDim.new(0,8)})
+    local flyOff = mk(flyRow, "TextButton", {Text = "OFF Fly", Size = UDim2.new(0,120,1,0), BackgroundColor3 = Color3.fromRGB(36,44,56)})
+    mk(flyOff, "UICorner", {CornerRadius = UDim.new(0,8)})
+
+    -- Minimal Fly demo (client-only): toggles BodyVelocity on HRP and PlatformStand
+    local flyActive = false
+    local flyBV, flyConns = nil, {}
+    local function startFlyDemo()
+        if flyActive then return end
+        local char = player.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+        flyActive = true
+        local hrp = char.HumanoidRootPart
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        pcall(function() humanoid.PlatformStand = true end)
+        flyBV = Instance.new("BodyVelocity")
+        flyBV.MaxForce = Vector3.new(1e5,1e5,1e5)
+        flyBV.P = 1e4
+        flyBV.Velocity = Vector3.new(0,0,0)
+        flyBV.Parent = hrp
+        local forward, right, up = 0,0,0
+        local function ib(input, gp)
+            if gp then return end
+            if input.KeyCode == Enum.KeyCode.W then forward = 1 end
+            if input.KeyCode == Enum.KeyCode.S then forward = -1 end
+            if input.KeyCode == Enum.KeyCode.A then right = -1 end
+            if input.KeyCode == Enum.KeyCode.D then right = 1 end
+            if input.KeyCode == Enum.KeyCode.Space then up = 1 end
+            if input.KeyCode == Enum.KeyCode.LeftControl then up = -1 end
+        end
+        local function ie(input, gp)
+            if gp then return end
+            if input.KeyCode == Enum.KeyCode.W or input.KeyCode == Enum.KeyCode.S then forward = 0 end
+            if input.KeyCode == Enum.KeyCode.A or input.KeyCode == Enum.KeyCode.D then right = 0 end
+            if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.LeftControl then up = 0 end
+        end
+        flyConns[#flyConns+1] = UserInputService.InputBegan:Connect(ib)
+        flyConns[#flyConns+1] = UserInputService.InputEnded:Connect(ie)
+        flyConns[#flyConns+1] = RunService.Heartbeat:Connect(function(dt)
+            if not flyActive then return end
+            if not hrp or not hrp.Parent then return end
+            local cam = workspace.CurrentCamera
+            local mv = (cam.CFrame.LookVector * forward + cam.CFrame.RightVector * right)
+            if mv.Magnitude > 0 then mv = mv.Unit * 50 else mv = Vector3.new(0,0,0) end
+            local vy = up * 40
+            flyBV.Velocity = Vector3.new(mv.X, vy, mv.Z)
+        end)
     end
-end)
+    local function stopFlyDemo()
+        if not flyActive then return end
+        flyActive = false
+        if flyBV and flyBV.Parent then flyBV:Destroy() end
+        for _,c in ipairs(flyConns) do pcall(function() c:Disconnect() end) end
+        flyConns = {}
+        pcall(function()
+            local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then humanoid.PlatformStand = false end
+        end)
+    end
+    flyOn.MouseButton1Click:Connect(startFlyDemo)
+    flyOff.MouseButton1Click:Connect(stopFlyDemo)
 
-print("JackUiPremium Dark Fade v3 loaded. Dán raw Fly/Invisible vào UserScripts table.")
+    -- Fly paste/run box
+    local flyBoxLabel = mk(p, "TextLabel", {Text = "Optional: paste Fly Lua code here and press Run", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(180,180,200), BackgroundTransparency = 1, Size = UDim2.new(1,0,0,16)})
+    local flyBox = mk(p, "TextBox", {Text = "", Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = Color3.fromRGB(230,230,240), BackgroundColor3 = Color3.fromRGB(28,32,38), Size = UDim2.new(1,0,0,56), ClearTextOnFocus = false, MultiLine = true})
+    mk(flyBox, "UICorner", {CornerRadius = UDim.new(0,8)})
+    local flyRunBtn = mk(p, "TextButton", {Text = "Run Fly (from pasted code)", Size = UDim2.new(0,220,0,36), BackgroundColor3 = Color3.fromRGB(36,44,56)})
+    mk(flyRunBtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+
+    -- Confirm modal (reusable)
+    local confirmModal = mk(ScreenGui, "Frame", {Size = UDim2.new(0,320,0,140), Position = UDim2.new(0.5,-160,0.5,-70), BackgroundColor3 = Color3.fromRGB(20,24,28), Visible = false, ZIndex = 120})
+    mk(confirmModal, "UICorner", {CornerRadius = UDim.new(0,10)})
+    local confirmText = mk(confirmModal, "TextLabel", {Text = "Confirm run of pasted code? This runs code on your client.", Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = Config.TextCyan, BackgroundTransparency = 1, Position = UDim2.new(0.05,0,0.12,0), Size = UDim2.new(0.9,0,0.5,0), TextWrapped = true})
+    local yesBtn = mk(confirmModal, "TextButton", {Text = "Yes — Run", Size = UDim2.new(0,120,0,36), Position = UDim2.new(0.08,0,0.7,0), BackgroundColor3 = Color3.fromRGB(36,44,56)})
+    mk(yesBtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+    local noBtn = mk(confirmModal, "TextButton", {Text = "Cancel", Size = UDim2.new(0,120,0,36), Position = UDim2.new(0.6,0,0.7,0), BackgroundColor3 = Color3.fromRGB(36,44,56)})
+    mk(noBtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+
+    local function showConfirm(cbYes)
+        confirmModal.Visible = true
+        yesBtn.MouseButton1Click:Connect(function()
+            confirmModal.Visible = false
+            pcall(cbYes)
+        end)
+        noBtn.MouseButton1Click:Connect(function() confirmModal.Visible = false end)
+    end
+
+    flyRunBtn.MouseButton1Click:Connect(function()
+        local code = flyBox.Text
+        if not code or code:match("^%s*$") then return end
+        showConfirm(function()
+            local fn, err = loadstring(code)
+            if not fn then warn("Load error:", err); return end
+            local ok, res = pcall(fn)
+            if not ok then warn("Runtime error:", res) end
+        end)
+    end)
+
+    -- Invisible (demo + paste)
+    mk(p, "TextLabel", {Text = "Invisible (demo / paste-run)", Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Config.TextCyan, BackgroundTransparency = 1, Size = UDim2.new(1,0,0,18)})
+    local invRow = mk(p, "Frame", {Size = UDim2.new(1,0,0,40), BackgroundTransparency = 1})
+    mk(invRow, "UIListLayout", {FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0,8)})
+    local invOn = mk(invRow, "TextButton", {Text = "ON Invisible (demo)", Size = UDim2.new(0,180,1,0), BackgroundColor3 = Color3.fromRGB(36,44,56)})
+    mk(invOn, "UICorner", {CornerRadius = UDim.new(0,8)})
+    local invOff = mk(invRow, "TextButton", {Text = "OFF Invisible", Size = UDim2.new(0,140,1,0), BackgroundColor3 = Color3.fromRGB(36,44,56)})
+    mk(invOff, "UICorner", {CornerRadius = UDim.new(0,8)})
+
+    local invActive = false
+    local invConn = nil
+    local invSaved = {}
+
+    local function invisSaveParts(char)
+        for _,v in pairs(char:GetDescendants()) do
+            if v:IsA("BasePart") then
+                invSaved[v] = {Transparency = v.Transparency, CanCollide = v.CanCollide}
+            end
+        end
+    end
+    local function invisSet(char)
+        for _,v in pairs(char:GetDescendants()) do
+            if v:IsA("BasePart") then
+                pcall(function() v.Transparency = 1; v.CanCollide = false end)
+            end
+        end
+    end
+    local function invisRestore(char)
+        for part,vals in pairs(invSaved) do
+            if part and part.Parent then
+                pcall(function() part.Transparency = vals.Transparency; part.CanCollide = vals.CanCollide end)
+            end
+        end
+        invSaved = {}
+    end
+
+    local savedCameraCFrame = nil
+    invOn.MouseButton1Click:Connect(function()
+        if invActive then return end
+        local char = player.Character
+        if not char then return end
+        invActive = true
+        savedCameraCFrame = workspace.CurrentCamera.CFrame
+        invisSaveParts(char)
+        invisSet(char)
+        invConn = RunService.Heartbeat:Connect(function()
+            -- keep camera fixed
+            pcall(function() workspace.CurrentCamera.CFrame = savedCameraCFrame end)
+            -- gently drift character away (client-side only)
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                pcall(function() hrp.CFrame = hrp.CFrame * CFrame.new(0.02, 0, 0.02) end)
+            end
+        end)
+    end)
+    invOff.MouseButton1Click:Connect(function()
+        if not invActive then return end
+        invActive = false
+        if invConn then pcall(function() invConn:Disconnect() end) end
+        local char = player.Character
+        if char and savedCameraCFrame then
+            pcall(function()
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if hrp then hrp.CFrame = savedCameraCFrame + (savedCameraCFrame.LookVector * 2) end
+            end)
+        end
+        invisRestore(player.Character or {})
+    end)
+
+    -- Invisible paste/run box
+    local invBoxLabel = mk(p, "TextLabel", {Text = "Optional: paste Invisible Lua code here and press Run", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(180,180,200), BackgroundTransparency = 1, Size = UDim2.new(1,0,0,16)})
+    local invBox = mk(p, "TextBox", {Text = "", Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = Color3.fromRGB(230,230,240), BackgroundColor3 = Color3.fromRGB(28,32,38), Size = UDim2.new(1,0,0,56), ClearTextOnFocus = false, MultiLine = true})
+    mk(invBox, "UICorner", {CornerRadius = UDim.new(0,8)})
+    local invRunBtn = mk(p, "TextButton", {Text = "Run Invisible (from pasted code)", Size = UDim2.new(0,260,0,36), BackgroundColor3 = Color3.fromRGB(36,44,56)})
+    mk(invRunBtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+    invRunBtn.MouseButton1Click:Connect(function()
+        local code = invBox.Text
+        if not code or code:match("^%s*$") then return end
+        showConfirm(function()
+            local fn, err = loadstring(code)
+            if not fn then warn("Load error:", err); return end
+            local ok, res = pcall(fn)
+            if not ok then warn("Runtime error:", res) end
+        end)
+    end)
+
+    -- Aimbot helper UI (copy URL + paste box + run)
+    mk(p, "TextLabel", {Text = "Aimbot Helper (safe)", Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Config.TextCyan, BackgroundTransparency = 1, Size = UDim2.new(1,0,0,18)})
+    local aimbotRow = mk(p, "Frame", {Size = UDim2.new(1,0,0,40), BackgroundTransparency = 1})
+    mk(aimbotRow, "UIListLayout", {FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0,8)})
+    -- Button that copies URL and shows instruction (does NOT fetch/run)
+    local aimbotCopyBtn = mk(aimbotRow, "TextButton", {Text = "Aimbot: Copy Raw URL", Size = UDim2.new(0,220,1,0), BackgroundColor3 = Color3.fromRGB(36,44,56)})
+    mk(aimbotCopyBtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+    local aimbotOpenBtn = mk(aimbotRow, "TextButton", {Text = "Open Skill Tab", Size = UDim2.new(0,140,1,0), BackgroundColor3 = Color3.fromRGB(36,44,56)})
+    mk(aimbotOpenBtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+    local aimbotNote = mk(aimbotRow, "TextLabel", {Text = "Click copy → open URL in browser → copy raw Lua → paste below.", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(180,180,200), BackgroundTransparency = 1, Size = UDim2.new(0.6,0,1,0)})
+
+    -- Aimbot paste box
+    local aimbotBoxLabel = mk(p, "TextLabel", {Text = "Aimbot (paste full raw Lua here then press Run)", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(180,180,200), BackgroundTransparency = 1, Size = UDim2.new(1,0,0,16)})
+    local aimbotBox = mk(p, "TextBox", {Text = "", Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = Color3.fromRGB(230,230,240), BackgroundColor3 = Color3.fromRGB(28,32,38), Size = UDim2.new(1,0,0,84), ClearTextOnFocus = false, MultiLine = true})
+    mk(aimbotBox, "UICorner", {CornerRadius = UDim.new(0,8)})
+    local aimbotRunBtn = mk(p, "TextButton", {Text = "Run Aimbot (from pasted code)", Size = UDim2.new(0,260,0,36), BackgroundColor3 = Color3.fromRGB(36,44,56)})
+    mk(aimbotRunBtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+
+    -- Aimbot URL (the URL you asked earlier). This code WILL NOT auto-fetch.
+    local AIMBOT_RAW_URL = "https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile"
+
+    aimbotCopyBtn.MouseButton1Click:Connect(function()
+        -- copy URL to clipboard and open Skill tab for convenience
+        pcall(function() setclipboard(AIMBOT_RAW_URL) end)
+        showTab("Skill")
+        -- give friendly feedback
+        aimbotBox.Text = "-- URL copied to clipboard. Open the URL in your browser, copy the raw Lua, then paste it here and press Run."
+        warn("[JackUiPremium] Aimbot URL copied to clipboard. Open it in your browser, copy raw Lua and paste into the Aimbot box above.")
+    end)
+    aimbotOpenBtn.MouseButton1Click:Connect(function() showTab("Skill") end)
+
+    aimbotRunBtn.MouseButton1Click:Connect(function()
+        local code = aimbotBox.Text
+        if not code or code:match("^%s*$") then
+            warn("[JackUiPremium] No aimbot code pasted.")
+            return
+        end
+        -- confirm before running
+        showConfirm(function()
+            -- execute pasted code (user accepts responsibility)
+            local fn, err = loadstring(code)
+            if not fn then
+                warn("[JackUiPremium] Load error:", err)
+                return
+            end
+            local ok, res = pcall(fn)
+            if not ok then warn("[JackUiPremium] Runtime error:", res) end
+        end)
+    end)
+
+end -- end Skill tab block
+
+-- ===============
+-- INFO & SETTINGS (minimal placeholders)
+-- ===============
+do
+    local p = panels["Info"]
+    mk(p, "TextLabel", {Text = "JackUiPremium — Info", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Config.TextCyan, BackgroundTransparency = 1, Size = UDim2.new(1,0,0,20)})
+    mk(p, "TextLabel", {Text = "Use Skill tab for Fly/Invisible demos and Aimbot helper (manual paste required).", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(180,180,200), BackgroundTransparency = 1, Size = UDim2.new(1,0,0,40)})
+end
+
+do
+    local p = panels["Settings"]
+    mk(p, "TextLabel", {Text = "Settings", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Config.TextCyan, BackgroundTransparency = 1, Size = UDim2.new(1,0,0,20)})
+    mk(p, "TextLabel", {Text = "No persistent save in this executor version. Confirm-before-run is enabled for safety.", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(180,180,200), BackgroundTransparency = 1, Size = UDim2.new(1,0,0,40)})
+end
+
+-- ===============
+-- Avatar open/close (right-top), fade UI
+-- ===============
+local Avatar = mk(ScreenGui, "ImageButton", {
+    Name = "AvatarBtn",
+    Size = UDim2.new(0,84,0,84),
+    Position = UDim2.new(1,-94,0,12), -- right top
+    BackgroundColor3 = Color3.fromRGB(28,28,32),
+    Image = "http://www.roblox.com/asset/?id=" .. tostring(Config.AvatarButtonId),
+    AutoButtonColor = true,
+    ZIndex = 120
+})
+mk(Avatar, "UICorner", {CornerRadius = UDim.new(1,0)})
+mk(Avatar, "UIStroke", {Color = Config.TextCyan, Thickness = 1.1})
+mk(Avatar, "Sound", {SoundId = "rbxassetid://9118823101", Volume = 0.9})
+
+local opened = false
+local function openUI()
+    if opened then return end
+    opened = true
+    Backdrop.Visible = true
+    blur.Enabled = true
+    tween(Backdrop, {BackgroundTransparency = 0.55}, Config.FadeTime)
+    tween(blur, {Size = 12}, Config.FadeTime)
+    Window.Visible = true
+    tween(Window, {BackgroundTransparency = 0}, Config.FadeTime)
+    Window.Position = UDim2.new(0.5,0,0.46,0)
+    tween(Window, {Position = UDim2.new(0.5,0,0.5,0)}, 0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+end
+local function closeUI()
+    if not opened then return end
+    opened = false
+    tween(Backdrop, {BackgroundTransparency = 1}, Config.FadeTime)
+    tween(blur, {Size = 0}, Config.FadeTime)
+    tween(Window, {BackgroundTransparency = 1}, Config.FadeTime)
+    tween(Window, {Position = UDim2.new(0.5,0,0.46,0)}, 0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    task.delay(Config.FadeTime + 0.05, function()
+        Window.Visible = false
+        Backdrop.Visible = false
+        blur.Enabled = false
+    end)
+end
+
+Avatar.MouseButton1Click:Connect(function()
+    pcall(function() Avatar:FindFirstChildOfClass("Sound"):Play() end)
+    if opened then closeUI() else openUI() end
+end)
+CloseBtn.MouseButton1Click:Connect(function() if opened then closeUI() end end)
+Backdrop.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 and opened then closeUI() end end)
+UserInputService.InputBegan:Connect(function(input, gp) if not gp and input.KeyCode == Enum.KeyCode.G then if opened then closeUI() else openUI() end end end)
+
+-- Final message
+print("[JackUiPremium] Safe UI loaded. Use Skill -> Aimbot helper to copy URL, paste raw Lua and then Run (with confirmation).")
+warn("[JackUiPremium] SECURITY: This UI WILL NOT auto-fetch+execute remote aimbot URLs. You must paste raw code yourself. Running pasted code is your responsibility.")
