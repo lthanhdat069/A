@@ -1,19 +1,20 @@
--- Dat Dz 💧 RPG Hub — Aqua Violet Chill Edition v4.5 (Safe UI version)
--- Mô phỏng giao diện, intro, glow, tabs ngang, avatar toggle — KHÔNG có loadstring/HttpGet
+-- Dat Dz 💧 RPG Hub — Aqua Violet Edition (Final safe-for-sharing)
+-- 2 tabs ngang, avatar toggle, intro 3s, glow chill, buttons copy loadstring(...)() commands
+-- IMPORTANT: Buttons will COPY the exact loadstring(...)() commands for you to paste into Delta and run.
+
+repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local StarterGui = game:GetService("StarterGui")
 local SoundService = game:GetService("SoundService")
-local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 
--- Utilities
-local function notify(title, text, duration)
-	duration = duration or 3
+local function notify(title, text, dur)
+	dur = dur or 3
 	pcall(function()
-		StarterGui:SetCore("SendNotification", {Title = title, Text = text, Duration = duration})
+		StarterGui:SetCore("SendNotification", {Title = title, Text = text, Duration = dur})
 	end)
 end
 
@@ -22,27 +23,49 @@ local function trySetClipboard(text)
 	return ok
 end
 
--- GUI factory so we can recreate on respawn
+-- Helper: create modal to show command for manual copy (if clipboard unsupported)
+local function showModal(parentFrame, text)
+	local modal = Instance.new("Frame", parentFrame)
+	modal.Size = UDim2.new(0.9,0,0,80)
+	modal.Position = UDim2.new(0.05,0,0,220)
+	modal.BackgroundColor3 = Color3.fromRGB(25,20,35)
+	modal.BorderSizePixel = 0
+	Instance.new("UICorner", modal).CornerRadius = UDim.new(0,8)
+
+	local lab = Instance.new("TextLabel", modal)
+	lab.Size = UDim2.new(1,-20,1,-20)
+	lab.Position = UDim2.new(0,10,0,10)
+	lab.BackgroundTransparency = 1
+	lab.TextColor3 = Color3.fromRGB(220,220,220)
+	lab.TextWrapped = true
+	lab.Font = Enum.Font.Code
+	lab.Text = text
+	lab.TextXAlignment = Enum.TextXAlignment.Left
+	lab.TextYAlignment = Enum.TextYAlignment.Top
+	lab.TextSize = 14
+
+	task.delay(12, function()
+		if modal and modal.Parent then modal:Destroy() end
+	end)
+end
+
+-- Build GUI
 local function CreateDatDzHub(parent)
-	-- cleanup existing
-	if parent:FindFirstChild("DatDzDatHub_UI") then
-		parent.DatDzDatHub_UI:Destroy()
-	end
+	-- cleanup previous
+	if parent:FindFirstChild("DatDzHub_UI") then parent.DatDzHub_UI:Destroy() end
 
 	local screen = Instance.new("ScreenGui")
-	screen.Name = "DatDzDatHub_UI"
+	screen.Name = "DatDzHub_UI"
 	screen.ResetOnSpawn = false
 	screen.Parent = parent
 	screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-	-- ---------- Intro ----------
+	-- Intro
 	local introFrame = Instance.new("Frame", screen)
-	introFrame.Name = "IntroFrame"
 	introFrame.Size = UDim2.new(1,0,1,0)
 	introFrame.BackgroundColor3 = Color3.fromRGB(12,8,18)
 	introFrame.BackgroundTransparency = 1
 
-	-- pulse glow image (soft)
 	local pulse = Instance.new("ImageLabel", introFrame)
 	pulse.AnchorPoint = Vector2.new(0.5,0.5)
 	pulse.Position = UDim2.new(0.5,0,0.45,0)
@@ -62,11 +85,8 @@ local function CreateDatDzHub(parent)
 	logo.TextColor3 = Color3.fromRGB(150,180,255)
 	logo.TextTransparency = 1
 	logo.TextScaled = true
-	local uistroke = Instance.new("UIStroke", logo)
-	uistroke.Color = Color3.fromRGB(170,130,255)
-	uistroke.Thickness = 1.4
+	local uistroke = Instance.new("UIStroke", logo); uistroke.Color = Color3.fromRGB(170,130,255); uistroke.Thickness = 1.4
 
-	-- subtitle
 	local sub = Instance.new("TextLabel", introFrame)
 	sub.AnchorPoint = Vector2.new(0.5,0)
 	sub.Position = UDim2.new(0.5,0,0.55,0)
@@ -76,26 +96,22 @@ local function CreateDatDzHub(parent)
 	sub.TextSize = 18
 	sub.TextColor3 = Color3.fromRGB(185,140,255)
 	sub.TextTransparency = 1
-	sub.RichText = false
 	sub.TextScaled = true
 
-	-- sound intro (play once)
 	local introSound = Instance.new("Sound")
-	introSound.SoundId = "rbxassetid://74697049223758" -- Raining Tacos
+	introSound.SoundId = "rbxassetid://74697049223758"
 	introSound.Volume = 0.9
 	introSound.Looped = false
 	introSound.Parent = SoundService
 	pcall(function() introSound:Play() end)
 
-	-- animate intro (3 seconds total)
+	-- animate intro (3s)
 	TweenService:Create(introFrame, TweenInfo.new(0.5), {BackgroundTransparency = 0.25}):Play()
 	TweenService:Create(logo, TweenInfo.new(0.9, Enum.EasingStyle.Quad), {TextTransparency = 0}):Play()
 	TweenService:Create(sub, TweenInfo.new(1.1, Enum.EasingStyle.Quad), {TextTransparency = 0}):Play()
-	-- subtle pulse
 	local pulseTween = TweenService:Create(pulse, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, -1, true), {ImageTransparency = 0.7})
 	pulseTween:Play()
 	task.delay(3, function()
-		-- fade out
 		TweenService:Create(logo, TweenInfo.new(0.9), {TextTransparency = 1}):Play()
 		TweenService:Create(sub, TweenInfo.new(0.9), {TextTransparency = 1}):Play()
 		TweenService:Create(introFrame, TweenInfo.new(0.9), {BackgroundTransparency = 1}):Play()
@@ -103,18 +119,18 @@ local function CreateDatDzHub(parent)
 		if introFrame and introFrame.Parent then introFrame:Destroy() end
 	end)
 
-	-- ---------- Main UI ----------
-	-- container (center)
+	-- Main container
 	local container = Instance.new("Frame", screen)
 	container.Name = "DatDzContainer"
 	container.AnchorPoint = Vector2.new(0.5,0.5)
 	container.Position = UDim2.new(0.5,0,0.5,0)
-	container.Size = UDim2.new(0, 520, 0, 360)
+	container.Size = UDim2.new(0,520,0,360)
 	container.BackgroundColor3 = Color3.fromRGB(22,18,32)
 	container.BackgroundTransparency = 0.12
-	container.Visible = false -- hidden until avatar pressed
-	Instance.new("UICorner", container).CornerRadius = UDim.new(0, 14)
-	-- subtle glow (ImageLabel)
+	container.Visible = false
+	Instance.new("UICorner", container).CornerRadius = UDim.new(0,14)
+
+	-- soft glow image
 	local glow = Instance.new("ImageLabel", container)
 	glow.Size = UDim2.new(1.12,0,1.12,0)
 	glow.Position = UDim2.new(-0.06,0,-0.06,0)
@@ -127,10 +143,8 @@ local function CreateDatDzHub(parent)
 	-- header
 	local header = Instance.new("Frame", container)
 	header.Size = UDim2.new(1,0,0,56)
-	header.Position = UDim2.new(0,0,0,0)
 	header.BackgroundColor3 = Color3.fromRGB(36,28,56)
-	header.BackgroundTransparency = 0
-	Instance.new("UICorner", header).CornerRadius = UDim.new(0, 12)
+	Instance.new("UICorner", header).CornerRadius = UDim.new(0,12)
 	local title = Instance.new("TextLabel", header)
 	title.Size = UDim2.new(1,0,1,0)
 	title.BackgroundTransparency = 1
@@ -139,15 +153,15 @@ local function CreateDatDzHub(parent)
 	title.TextColor3 = Color3.fromRGB(185,150,255)
 	title.TextScaled = true
 
-	-- top tabs bar (horizontal)
+	-- tabs bar (top horizontal)
 	local tabsBar = Instance.new("Frame", container)
-	tabsBar.Size = UDim2.new(1, -40, 0, 44)
+	tabsBar.Size = UDim2.new(1,-40,0,44)
 	tabsBar.Position = UDim2.new(0,20,0,66)
 	tabsBar.BackgroundTransparency = 1
 
 	local function MakeTabLabel(txt, posX)
 		local btn = Instance.new("TextButton", tabsBar)
-		btn.Size = UDim2.new(0, 220, 1, 0)
+		btn.Size = UDim2.new(0,220,1,0)
 		btn.Position = UDim2.new(0, (posX-1)*220, 0, 0)
 		btn.Text = txt
 		btn.Font = Enum.Font.GothamBold
@@ -159,25 +173,23 @@ local function CreateDatDzHub(parent)
 		return btn
 	end
 
-	local tabInputBtn = MakeTabLabel("🧩 Nhập Script", 1)
-	local tabPopularBtn = MakeTabLabel("⚡ Script Phổ Biến", 2)
+	local tabInputBtn = MakeTabLabel("🧩 Nhập Script",1)
+	local tabPopularBtn = MakeTabLabel("⚡ Script Phổ Biến",2)
 
 	-- content frames
 	local content = Instance.new("Frame", container)
-	content.Size = UDim2.new(1, -40, 1, -140)
+	content.Size = UDim2.new(1,-40,1,-140)
 	content.Position = UDim2.new(0,20,0,120)
 	content.BackgroundTransparency = 1
 
-	local pageInput = Instance.new("Frame", content)
-	pageInput.Size = UDim2.new(1,0,1,0); pageInput.BackgroundTransparency = 1; pageInput.Visible = true
-	local pagePopular = Instance.new("Frame", content)
-	pagePopular.Size = UDim2.new(1,0,1,0); pagePopular.BackgroundTransparency = 1; pagePopular.Visible = false
+	local pageInput = Instance.new("Frame", content); pageInput.Size = UDim2.new(1,0,1,0); pageInput.BackgroundTransparency = 1; pageInput.Visible = true
+	local pagePopular = Instance.new("Frame", content); pagePopular.Size = UDim2.new(1,0,1,0); pagePopular.BackgroundTransparency = 1; pagePopular.Visible = false
 
-	-- Page Input elements
+	-- Input page elements
 	local inputBox = Instance.new("TextBox", pageInput)
 	inputBox.Size = UDim2.new(1, -20, 0, 160)
 	inputBox.Position = UDim2.new(0,10,0,0)
-	inputBox.PlaceholderText = "Dán script code hoặc dán link raw vào đây..."
+	inputBox.PlaceholderText = "Dán code hoặc dán link raw vào đây..."
 	inputBox.TextWrapped = true
 	inputBox.ClearTextOnFocus = false
 	inputBox.Font = Enum.Font.Code
@@ -188,31 +200,48 @@ local function CreateDatDzHub(parent)
 	local runBtn = Instance.new("TextButton", pageInput)
 	runBtn.Size = UDim2.new(0,160,0,36)
 	runBtn.Position = UDim2.new(0.5, -80, 0, 170)
-	runBtn.Text = "📋 Sao chép (Clipboard)"
+	runBtn.Text = "▶️ Chuẩn bị lệnh (Copy -> Paste Delta)"
 	runBtn.Font = Enum.Font.GothamBold
 	runBtn.TextColor3 = Color3.fromRGB(255,255,255)
 	runBtn.BackgroundColor3 = Color3.fromRGB(110,70,200)
 	Instance.new("UICorner", runBtn).CornerRadius = UDim.new(0,8)
 
 	runBtn.MouseButton1Click:Connect(function()
-		local t = inputBox.Text or ""
-		if (t or ""):match("%S") then
-			local ok = trySetClipboard(t)
+		local txt = inputBox.Text or ""
+		if not txt:match("%S") then
+			notify("⚠️ Dat Dz", "Bạn chưa nhập script!", 2); return
+		end
+
+		-- If it's a URL: prepare loadstring(game:HttpGet("URL"))() command
+		if txt:match("^https?://") then
+			local cmd = 'loadstring(game:HttpGet("' .. txt .. '"))()'
+			local ok = trySetClipboard(cmd)
 			if ok then
-				notify("✅ Đã sao chép", "Script/Link đã được copy vào clipboard.", 2)
+				notify("✅ Lệnh copy sẵn", "Mở Delta → paste → Execute.", 4)
 			else
-				notify("ℹ️ Không hỗ trợ", "Không thể copy trong môi trường này. Sao chép thủ công.", 4)
+				notify("ℹ️ Hiển thị lệnh", "Không copy tự động. Lệnh hiển thị để bạn sao chép.", 4)
+				showModal(pageInput, cmd)
 			end
 		else
-			notify("⚠️ Trống", "Bạn chưa nhập gì để sao chép.", 2)
+			-- If it's code: wrap into loadstring long-string
+			local safe_block = "[==[" .. txt .. "]==]"
+			local cmd = "loadstring(" .. safe_block .. ")()"
+			local ok = trySetClipboard(cmd)
+			if ok then
+				notify("✅ Code đã đóng gói", "Mở Delta → paste → Execute.", 4)
+			else
+				notify("ℹ️ Hiển thị lệnh", "Không copy tự động. Lệnh hiển thị để bạn sao chép.", 4)
+				showModal(pageInput, cmd)
+			end
 		end
 	end)
 
-	-- Page Popular: 3 sample buttons (copy link)
+	-- Popular page: 4 buttons that prepare exact run command (copy or show)
 	local popularList = {
-		{title = "💨 Fly V3", link = "https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"},
-		{title = "👑 Infinite Yield", link = "https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"},
-		{title = "🚶‍♂️ Đi Trên Không", link = "https://pastefy.app/Qc1ZIUwO/raw"},
+		{title = "💨 Fly V3", runcmd = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()'},
+		{title = "👑 Infinite Yield", runcmd = 'loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))()'},
+		{title = "🕶️ Invisible Man", runcmd = 'loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))()'},
+		{title = "🚶‍♂️ Đi Trên Không", runcmd = 'loadstring(game:HttpGet("https://pastefy.app/Qc1ZIUwO/raw", true))()'},
 	}
 
 	for i,info in ipairs(popularList) do
@@ -226,25 +255,18 @@ local function CreateDatDzHub(parent)
 		Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
 
 		b.MouseButton1Click:Connect(function()
-			-- an toàn: copy link -> bạn có thể paste vào executor
-			local ok = trySetClipboard(info.link)
+			local cmd = info.runcmd
+			local ok = trySetClipboard(cmd)
 			if ok then
-				notify("✅ Link copied", info.title.." - Link đã được sao chép.", 2)
+				notify("✅ Lệnh đã copy", info.title .. " - paste vào Delta và Execute", 3)
 			else
-				notify("ℹ️ Copy thất bại", "Không hỗ trợ setclipboard. Link:\n" .. info.link, 6)
+				notify("ℹ️ Hiển thị lệnh", "Không copy tự động. Lệnh sẽ hiển thị để bạn sao chép.", 4)
+				showModal(pagePopular, cmd)
 			end
-
-			-- === TÙY CHỌN (TỰ CHẠY) ===
-			-- Nếu bạn muốn nút này **tự chạy** script từ URL, bạn có thể:
-			-- 1) tự thêm (trong môi trường executor tin cậy) dòng sau (thêm ở đây):
-			--    local ok, res = pcall(function() return game:HttpGet(info.link) end)
-			--    if ok then loadstring(res)() end
-			-- 2) hoặc paste link vào ô "Nhập Script" rồi run bằng executor.
-			-- MÌNH KHÔNG TỰ CHÈN/CHẠY HTTP LOADSTRING Ở ĐÂY (vì lý do an toàn).
 		end)
 	end
 
-	-- tabs switching
+	-- tabs switch
 	tabInputBtn.MouseButton1Click:Connect(function()
 		pageInput.Visible = true
 		pagePopular.Visible = false
@@ -254,7 +276,7 @@ local function CreateDatDzHub(parent)
 		pagePopular.Visible = true
 	end)
 
-	-- watermark small
+	-- watermark
 	local watermark = Instance.new("TextLabel", screen)
 	watermark.AnchorPoint = Vector2.new(0.5,0)
 	watermark.Position = UDim2.new(0.5, 0, 0.92, 0)
@@ -266,7 +288,6 @@ local function CreateDatDzHub(parent)
 	watermark.TextTransparency = 0.3
 	watermark.TextScaled = true
 
-	-- small top-right watermark too
 	local wr = Instance.new("TextLabel", screen)
 	wr.Size = UDim2.new(0,160,0,20)
 	wr.Position = UDim2.new(0.78,0,0.02,0)
@@ -277,7 +298,7 @@ local function CreateDatDzHub(parent)
 	wr.TextTransparency = 0.25
 	wr.TextScaled = true
 
-	-- ---------- Avatar toggle (visible always) ----------
+	-- avatar toggle
 	local avatar = Instance.new("ImageButton", screen)
 	avatar.Name = "DatDz_Avatar"
 	avatar.Size = UDim2.new(0,56,0,56)
@@ -288,16 +309,15 @@ local function CreateDatDzHub(parent)
 	Instance.new("UICorner", avatar).CornerRadius = UDim.new(1,10)
 	local stroke = Instance.new("UIStroke", avatar); stroke.Color = Color3.fromRGB(170,130,255); stroke.Thickness = 1.2
 
-	-- toggle behavior: fade + zoom (chill)
+	-- toggle with fade+zoom
 	local isOpen = false
 	avatar.MouseButton1Click:Connect(function()
 		isOpen = not isOpen
 		if isOpen then
 			container.Visible = true
-			-- start small/transparent
 			container.Size = UDim2.new(0,420,0,300)
-			container.BackgroundTransparency = 1
 			container.Position = UDim2.new(0.5,0,0.48,0)
+			container.BackgroundTransparency = 1
 			TweenService:Create(container, TweenInfo.new(0.42, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 				Size = UDim2.new(0,520,0,360),
 				BackgroundTransparency = 0.12,
@@ -315,25 +335,24 @@ local function CreateDatDzHub(parent)
 		end
 	end)
 
-	-- ensure avatar always on top
 	avatar.ZIndex = 1001
 	container.ZIndex = 1000
 	wr.ZIndex = 1002
 	watermark.ZIndex = 1002
-	-- return screen (for external use)
+
 	return screen
 end
 
--- Create at start in PlayerGui and re-create on respawn
+-- ensure gui
 local function ensureGui()
-	local parent = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
-	-- create UI in PlayerGui
-	CreateDatDzHub(parent)
+	local pg = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+	CreateDatDzHub(pg)
 end
 
 ensureGui()
--- recreate on character added (so GUI returns after reset)
 player.CharacterAdded:Connect(function()
 	task.wait(0.8)
 	ensureGui()
 end)
+
+-- End of script
