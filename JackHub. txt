@@ -1,205 +1,218 @@
--- Jack Hub - Attack Button & Crosshair only
+-- Jack Hub v3 - Amethyst, Animated GUI, Horizontal Tabs
+-- Sol built
+
 repeat task.wait() until game:IsLoaded()
 
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
 
-local LocalPlayer = Players.LocalPlayer
-
--- =========================
+-- ========================
 -- CONFIG
--- =========================
+-- ========================
 local Config = {
-    GuiName = "JackHubGUI_Attack",
-    WindowTitle = "Jack Hub 💎",
-    WindowSubTitle = "Attack & Crosshair Demo",
-    ThemeColor = Color3.fromRGB(0, 170, 255), -- Aqua
-    WindowWidth = 480,
-    WindowHeight = 280,
-    TabHeight = 40,
-    AnimationTime = 0.25
+    GuiName = "JackHubGUI_v3",
+    ThemeColor = Color3.fromRGB(155, 100, 250), -- Amethyst
+    WindowWidth = 600,
+    WindowHeight = 380,
+    TabHeight = 46,
+    AnimationTime = 0.28,
+    BackdropMaxTransparency = 0.6
 }
 
--- =========================
--- UTILS
--- =========================
-local function mk(parent, class, props)
+-- ========================
+-- HELPERS
+-- ========================
+local function mk(parent,class,props)
     local obj = Instance.new(class)
-    if props then for k,v in pairs(props) do obj[k] = v end end
+    if props then
+        for k,v in pairs(props) do
+            if type(k)=="string" then obj[k]=v end
+        end
+    end
     obj.Parent = parent
     return obj
 end
 
-local function tween(obj, props, time)
-    return TweenService:Create(obj, TweenInfo.new(time or Config.AnimationTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), props)
+local function tween(obj,props,time,style,dir)
+    return TweenService:Create(obj,TweenInfo.new(time or Config.AnimationTime,style or Enum.EasingStyle.Quad,dir or Enum.EasingDirection.Out),props)
 end
 
--- =========================
--- CLEANUP
--- =========================
-if CoreGui:FindFirstChild(Config.GuiName) then
-    CoreGui[Config.GuiName]:Destroy()
-end
+-- Cleanup old GUI
+if CoreGui:FindFirstChild(Config.GuiName) then CoreGui[Config.GuiName]:Destroy() end
 
--- =========================
+-- ========================
 -- SCREEN GUI
--- =========================
-local ScreenGui = mk(CoreGui, "ScreenGui", {
-    Name = Config.GuiName,
-    ResetOnSpawn = false
-})
+-- ========================
+local ScreenGui = mk(CoreGui,"ScreenGui",{Name=Config.GuiName,ResetOnSpawn=false,ZIndexBehavior=Enum.ZIndexBehavior.Sibling})
 
--- Backdrop
-local Backdrop = mk(ScreenGui, "Frame", {
-    BackgroundColor3 = Color3.fromRGB(0,0,0),
-    BackgroundTransparency = 1,
-    Size = UDim2.new(1,0,1,0),
-    ZIndex = 2,
-    Visible = true
-})
+local Backdrop = mk(ScreenGui,"Frame",{BackgroundColor3=Color3.new(0,0,0),BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Position=UDim2.new(0,0,0,0),Visible=true,ZIndex=2})
 
--- Main Window
-local Window = mk(ScreenGui, "Frame", {
-    Name = "MainWindow",
-    Size = UDim2.new(0, Config.WindowWidth, 0, Config.WindowHeight),
-    Position = UDim2.new(1.2, 0, 0.5, 0),
-    AnchorPoint = Vector2.new(0.5,0.5),
-    BackgroundColor3 = Color3.fromRGB(20,25,30),
-    ZIndex = 5
-})
-mk(Window, "UICorner", {CornerRadius = UDim.new(0,12)})
+local Window = mk(ScreenGui,"Frame",{Size=UDim2.new(0,Config.WindowWidth,0,Config.WindowHeight),Position=UDim2.new(1.2,0,0.5,0),AnchorPoint=Vector2.new(0.5,0.5),BackgroundColor3=Color3.fromRGB(18,24,30),ZIndex=5})
+mk(Window,"UICorner",{CornerRadius=UDim.new(0,12)})
 
 -- Title
-local Title = mk(Window, "TextLabel", {
-    Text = Config.WindowTitle,
-    Font = Enum.Font.GothamBold,
-    TextSize = 18,
-    TextColor3 = Config.ThemeColor,
-    BackgroundTransparency = 1,
-    Position = UDim2.new(0.03,0,0.05,0),
-    Size = UDim2.new(0.9,0,0.2,0),
-    TextXAlignment = Enum.TextXAlignment.Left
-})
-local SubTitle = mk(Window, "TextLabel", {
-    Text = Config.WindowSubTitle,
-    Font = Enum.Font.Gotham,
-    TextSize = 12,
-    TextColor3 = Color3.fromRGB(180,180,200),
-    BackgroundTransparency = 1,
-    Position = UDim2.new(0.03,0,0.25,0),
-    Size = UDim2.new(0.9,0,0.2,0),
-    TextXAlignment = Enum.TextXAlignment.Left
-})
+local TitleBar = mk(Window,"Frame",{BackgroundTransparency=1,Size=UDim2.new(1,0,0,54)})
+local TitleLabel = mk(TitleBar,"TextLabel",{BackgroundTransparency=1,Position=UDim2.new(0.02,0,0.14,0),Size=UDim2.new(0.6,0,0.72,0),Text="RGP",Font=Enum.Font.GothamBold,TextSize=20,TextColor3=Color3.fromRGB(155,255,255),TextXAlignment=Enum.TextXAlignment.Left})
+local SubTitleLabel = mk(TitleBar,"TextLabel",{BackgroundTransparency=1,Position=UDim2.new(0.02,0,0.54,0),Size=UDim2.new(0.6,0,0.4,0),Text="Jack Hub v3",Font=Enum.Font.Gotham,TextSize=12,TextColor3=Color3.fromRGB(155,255,255),TextXAlignment=Enum.TextXAlignment.Left})
 
--- Close Button
-local CloseBtn = mk(Window, "TextButton", {
-    Text = "X",
-    Font = Enum.Font.GothamBold,
-    TextSize = 16,
-    TextColor3 = Color3.fromRGB(230,230,230),
-    BackgroundColor3 = Color3.fromRGB(50,50,60),
-    Position = UDim2.new(0.92,0,0.05,0),
-    Size = UDim2.new(0,30,0,30)
-})
-mk(CloseBtn, "UICorner", {CornerRadius = UDim.new(0,6)})
+local CloseBtn = mk(TitleBar,"TextButton",{BackgroundTransparency=0.2,BackgroundColor3=Color3.fromRGB(50,50,60),Position=UDim2.new(0.94,0,0.14,0),Size=UDim2.new(0,30,0,30),Text="X",Font=Enum.Font.GothamBold,TextSize=16,TextColor3=Color3.fromRGB(230,230,230)})
+mk(CloseBtn,"UICorner",{CornerRadius=UDim.new(0,6)})
 
--- Toggle Window
-local MenuOpen = false
-local function openMenu()
-    tween(Backdrop,{BackgroundTransparency=0.5},Config.AnimationTime):Play()
-    tween(Window,{Position=UDim2.new(0.5,0,0.5,0)},Config.AnimationTime):Play()
-    MenuOpen = true
+-- Draggable
+local dragging,dragInput,dragStart,startPos
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType==Enum.UserInputType.MouseButton1 then
+        dragging=true
+        dragStart=input.Position
+        startPos=Window.Position
+        input.Changed:Connect(function()
+            if input.UserInputState==Enum.UserInputState.End then dragging=false end
+        end)
+    end
+end)
+TitleBar.InputChanged:Connect(function(input)
+    if input.UserInputType==Enum.UserInputType.MouseMovement then dragInput=input end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if input==dragInput and dragging then
+        local delta=input.Position - dragStart
+        Window.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
+    end
+end)
+
+-- Tabs horizontal
+local TabsBar = mk(Window,"Frame",{BackgroundTransparency=1,Position=UDim2.new(0,0,0.13,0),Size=UDim2.new(1,0,0,Config.TabHeight)})
+local TabsUIList = mk(TabsBar,"UIListLayout",{Padding=UDim.new(0,6),FillDirection=Enum.FillDirection.Horizontal,HorizontalAlignment=Enum.HorizontalAlignment.Left,SortOrder=Enum.SortOrder.LayoutOrder})
+TabsUIList.Parent=TabsBar
+
+local ContentContainer = mk(Window,"Frame",{BackgroundTransparency=1,Position=UDim2.new(0,12,0.13 + (Config.TabHeight/Config.WindowHeight),0),Size=UDim2.new(1,-24,1,-(54+12+Config.TabHeight))})
+
+local function createTabButton(name)
+    local btn = mk(TabsBar,"TextButton",{BackgroundColor3=Color3.fromRGB(30,36,45),BackgroundTransparency=0,Size=UDim2.new(0,110,0,Config.TabHeight),Text=""})
+    mk(btn,"UICorner",{CornerRadius=UDim.new(0,8)})
+    local label = mk(btn,"TextLabel",{BackgroundTransparency=1,Position=UDim2.new(0.1,0,0,0),Size=UDim2.new(0.9,0,1,0),Text=name,Font=Enum.Font.Gotham,TextSize=14,TextColor3=Color3.fromRGB(155,255,255),TextXAlignment=Enum.TextXAlignment.Left})
+    return btn
 end
-local function closeMenu()
+
+local function createContentFrame(name)
+    local fr = mk(ContentContainer,"Frame",{BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Visible=false})
+    mk(fr,"UIListLayout",{Padding=UDim.new(0,8),FillDirection=Enum.FillDirection.Vertical,VerticalAlignment=Enum.VerticalAlignment.Top})
+    return fr
+end
+
+local function createFuncButton(parent,title,callback)
+    local btn = mk(parent,"TextButton",{BackgroundColor3=Config.ThemeColor,Size=UDim2.new(1,0,0,40),Text=title,TextColor3=Color3.fromRGB(255,255,255),Font=Enum.Font.GothamBold,TextSize=16})
+    mk(btn,"UICorner",{CornerRadius=UDim.new(0,6)})
+    btn.MouseButton1Click:Connect(callback)
+    return btn
+end
+
+-- ========================
+-- TABS & CONTENT
+-- ========================
+local tabNames={"Main1","Main2"}
+local contentFrames={}
+local tabButtons={}
+local currentTab
+
+for i,name in ipairs(tabNames) do
+    local btn=createTabButton(name)
+    btn.LayoutOrder=i
+    tabButtons[name]=btn
+    local fr=createContentFrame(name)
+    contentFrames[name]=fr
+end
+
+local function showTab(name)
+    if currentTab==name then return end
+    if currentTab and contentFrames[currentTab] then contentFrames[currentTab].Visible=false end
+    contentFrames[name].Visible=true
+    currentTab=name
+end
+
+for name,btn in pairs(tabButtons) do
+    btn.MouseButton1Click:Connect(function() showTab(name) end)
+end
+
+-- ========================
+-- MAIN1: Execute
+-- ========================
+do
+    local fr=contentFrames["Main1"]
+    local textBox = Instance.new("TextBox")
+    textBox.PlaceholderText="Execute by Dat"
+    textBox.Size=UDim2.new(1,0,0,40)
+    textBox.BackgroundColor3=Color3.fromRGB(36,44,56)
+    textBox.TextColor3=Color3.fromRGB(255,255,255)
+    textBox.Font=Enum.Font.Gotham
+    textBox.TextSize=16
+    textBox.Parent=fr
+    mk(textBox,"UICorner",{CornerRadius=UDim.new(0,6)})
+    createFuncButton(fr,"Run Script",function()
+        local code=textBox.Text
+        if code~="" then
+            local ok,err=pcall(loadstring(code))
+            if not ok then warn("Execute error:",err) end
+        end
+    end)
+end
+
+-- ========================
+-- MAIN2: Fly & Walk on Air
+-- ========================
+do
+    local fr=contentFrames["Main2"]
+
+    -- Fly button
+    local FlyBtn = createFuncButton(fr,"Fly (EzzWin)",function()
+        warn("Fly toggled") -- Bạn có thể chèn Fly code raw ở đây
+    end)
+
+    -- Walk on Air button
+    local WalkAirBtn = createFuncButton(fr,"Walk on Air",function()
+        warn("Walk on Air toggled") -- Chèn Walk on Air raw
+    end)
+end
+
+-- Set first tab active
+showTab("Main1")
+
+-- ========================
+-- OPEN/CLOSE MENU
+-- ========================
+local OpenBtn = mk(ScreenGui,"ImageButton",{BackgroundColor3=Color3.fromRGB(0,0,0),BackgroundTransparency=0.25,BorderSizePixel=0,Size=UDim2.new(0,48,0,48),Position=UDim2.new(0.06,0,0.12,0),Image="",AutoButtonColor=true,ZIndex=6})
+mk(OpenBtn,"UICorner",{CornerRadius=UDim.new(1,10)})
+
+ScreenGui:SetAttribute("MenuOpen",false)
+local function openVisual()
+    Backdrop.Visible=true
+    tween(Backdrop,{BackgroundTransparency=Config.BackdropMaxTransparency},Config.AnimationTime):Play()
+    tween(Window,{Position=UDim2.new(0.5,0,0.5,0)},Config.AnimationTime,Enum.EasingStyle.Back,Enum.EasingDirection.Out):Play()
+end
+local function closeVisual()
     tween(Backdrop,{BackgroundTransparency=1},Config.AnimationTime):Play()
-    tween(Window,{Position=UDim2.new(1.2,0,0.5,0)},Config.AnimationTime):Play()
-    MenuOpen = false
+    local tw=tween(Window,{Position=UDim2.new(1.2,0,0.5,0)},Config.AnimationTime,Enum.EasingStyle.Back,Enum.EasingDirection.In)
+    tw:Play()
+    tw.Completed:Wait()
+    Backdrop.Visible=false
 end
-CloseBtn.MouseButton1Click:Connect(function()
-    closeMenu()
-end)
-Backdrop.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        if MenuOpen then closeMenu() end
-    end
-end)
-UserInputService.InputBegan:Connect(function(input,gpe)
-    if not gpe and input.KeyCode==Enum.KeyCode.End then
-        if MenuOpen then closeMenu() else openMenu() end
-    end
-end)
-
--- =========================
--- ATTACK BUTTON
--- =========================
-local AttackActive = true
-local AttackBtn = mk(ScreenGui, "TextButton", {
-    Name = "AttackButton",
-    Size = UDim2.new(0,60,0,60),
-    Position = UDim2.new(0.8,0,0.8,0),
-    BackgroundColor3 = Color3.fromRGB(40,40,50),
-    Text = "",
-    AutoButtonColor = true
-})
-mk(AttackBtn,"UICorner",{CornerRadius=UDim.new(0,8)})
-local SwordIcon = mk(AttackBtn,"TextLabel",{
-    Text = "🗡️",
-    Font=Enum.Font.GothamBold,
-    TextSize=30,
-    TextColor3=Config.ThemeColor,
-    BackgroundTransparency=1,
-    Size=UDim2.new(1,0,1,0),
-    Position=UDim2.new(0,0,0,0)
-})
-
-local function attack()
-    -- Simulate 1 tap at center (pseudo code, replace with game-specific attack)
-    local mouse = LocalPlayer:GetMouse()
-    local target = mouse.Target
-    if target then
-        -- can insert game-specific hit logic here
-        warn("Attack executed at target:", target:GetFullName())
+local function toggleMenu()
+    if ScreenGui:GetAttribute("MenuOpen") then
+        closeVisual()
+        ScreenGui:SetAttribute("MenuOpen",false)
     else
-        warn("No target in center")
+        openVisual()
+        ScreenGui:SetAttribute("MenuOpen",true)
     end
 end
 
-AttackBtn.MouseButton1Click:Connect(function()
-    if AttackActive then
-        attack()
-    end
-end)
+OpenBtn.MouseButton1Click:Connect(toggleMenu)
+CloseBtn.MouseButton1Click:Connect(toggleMenu)
+Backdrop.InputBegan:Connect(function(input) if input.UserInputType==Enum.UserInputType.MouseButton1 then toggleMenu() end end)
+UserInputService.InputBegan:Connect(function(input,gpe) if not gpe and input.KeyCode==Enum.KeyCode.End then toggleMenu() end end)
 
--- On/Off toggle (example: press F)
-UserInputService.InputBegan:Connect(function(input,gpe)
-    if gpe then return end
-    if input.KeyCode==Enum.KeyCode.F then
-        AttackActive = not AttackActive
-        AttackBtn.BackgroundColor3 = AttackActive and Color3.fromRGB(40,40,50) or Color3.fromRGB(80,40,40)
-    end
-end)
-
--- =========================
--- CROSSHAIR
--- =========================
-local CrosshairActive = true
-local Crosshair = mk(ScreenGui, "Frame", {
-    Name = "Crosshair",
-    Size = UDim2.new(0,16,0,16),
-    Position = UDim2.new(0.5,-8,0.5,-8),
-    BackgroundColor3 = Config.ThemeColor,
-})
-mk(Crosshair,"UICorner",{CornerRadius=UDim.new(1,4)})
-
-UserInputService.InputBegan:Connect(function(input,gpe)
-    if gpe then return end
-    if input.KeyCode==Enum.KeyCode.G then
-        CrosshairActive = not CrosshairActive
-        Crosshair.Visible = CrosshairActive
-    end
-end)
-
-print("Jack Hub - Attack & Crosshair loaded ✅")
+print("Jack Hub v3 loaded.")
