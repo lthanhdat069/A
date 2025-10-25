@@ -1,224 +1,129 @@
--- JackUiPremium 💎 Dark Aqua Edition
--- Sol created this for Jack 😎
--- An toàn: không có exploit; chỉ là GUI + khung sẵn để Jack tự dán script
+-- 💎 JackUiPremium Dark v3 | Mở menu bằng avatar
+-- Author: Jack 💠 | Giao diện viền cong + animation mở/đóng
 
 repeat task.wait() until game:IsLoaded()
+wait(1)
 
---============================
--- CONFIG
---============================
-local Config = {
-    GuiName = "JackUiPremium",
-    ButtonImageId = "103173399598412", 
-    WindowTitle = "JackUiPremium 💎",
-    WindowSubTitle = "Dark Aqua Style by Sol",
-    Theme = "Dark",
-    WindowWidth = 660,
-    WindowHeight = 390,
-    TabHeight = 46,
-    AnimationTime = 0.28,
-    BackdropMaxTransparency = 0.6,
-    TopBarIconSize = 20
-}
-
---============================
--- USER SCRIPTS (Jack tự dán)
---============================
+-- ⚙️ Chỗ để bạn dán script thật
 local UserScripts = {
-    Fly = "loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()",
-    Invisible = "loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))()",
-    WalkOnAir = "loadstring(game:HttpGet("https://pastefy.app/Qc1ZIUwO/raw", true))()",
-    InfiniteYield = "loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))()"
+    Fly = "loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()", -- Dán script Fly của bạn vào đây
+    Invisible = "loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))()", -- Dán script Invisible vào đây
+    WalkOnAir = "loadstring(game:HttpGet("https://pastefy.app/Qc1ZIUwO/raw", true))()", -- Dán script WalkOnAir vào đây
+    InfiniteYield = "loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))()" -- Dán Infinite Yield ở đây
 }
 
---============================
--- SERVICE SETUP
---============================
+-- 🪩 GUI chính
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "JackUiPremium"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.ResetOnSpawn = false
+
+-- 🔘 Nút mở menu (Avatar)
+local OpenButton = Instance.new("ImageButton")
+OpenButton.Parent = ScreenGui
+OpenButton.Size = UDim2.new(0, 60, 0, 60)
+OpenButton.Position = UDim2.new(0.05, 0, 0.15, 0)
+OpenButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+OpenButton.BorderSizePixel = 0
+OpenButton.Image = "http://www.roblox.com/asset/?id=103173399598412" -- 👈 đổi ảnh avatar menu tại đây
+OpenButton.AutoButtonColor = true
+OpenButton.Active = true
+
+local UICornerButton = Instance.new("UICorner", OpenButton)
+UICornerButton.CornerRadius = UDim.new(1, 0)
+local UIStrokeButton = Instance.new("UIStroke", OpenButton)
+UIStrokeButton.Color = Color3.fromRGB(155, 210, 255)
+UIStrokeButton.Thickness = 1.2
+
+-- 🪞 Menu chính
+local MenuFrame = Instance.new("Frame")
+MenuFrame.Size = UDim2.new(0, 550, 0, 350)
+MenuFrame.Position = UDim2.new(0.5, -275, 0.5, -175)
+MenuFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MenuFrame.BorderSizePixel = 0
+MenuFrame.Visible = false
+MenuFrame.Active = true
+MenuFrame.Draggable = true
+MenuFrame.ClipsDescendants = true
+MenuFrame.Parent = ScreenGui
+
+local UICornerFrame = Instance.new("UICorner", MenuFrame)
+UICornerFrame.CornerRadius = UDim.new(0, 20)
+local UIStrokeFrame = Instance.new("UIStroke", MenuFrame)
+UIStrokeFrame.Color = Color3.fromRGB(155, 210, 255)
+UIStrokeFrame.Thickness = 1.2
+local UIScale = Instance.new("UIScale", MenuFrame)
+UIScale.Scale = 0
+
+-- 💎 Tiêu đề
+local Title = Instance.new("TextLabel")
+Title.Parent = MenuFrame
+Title.Text = "JackUiPremium 💎"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 24
+Title.TextColor3 = Color3.fromRGB(155, 210, 255)
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 20, 0, 10)
+Title.Size = UDim2.new(1, -40, 0, 40)
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- 🧭 Tabs ngang
+local TabBar = Instance.new("Frame", MenuFrame)
+TabBar.Size = UDim2.new(1, 0, 0, 40)
+TabBar.Position = UDim2.new(0, 0, 0, 55)
+TabBar.BackgroundTransparency = 0.15
+TabBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+local TabCorner = Instance.new("UICorner", TabBar)
+TabCorner.CornerRadius = UDim.new(0, 20)
+local UIListLayout = Instance.new("UIListLayout", TabBar)
+UIListLayout.FillDirection = Enum.FillDirection.Horizontal
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.Padding = UDim.new(0, 8)
+
+-- 🎚️ Tabs mẫu
+local Tabs = {"Main 1", "Main 2", "Main 3", "Main 4"}
+for _, name in pairs(Tabs) do
+    local Button = Instance.new("TextButton")
+    Button.Text = name
+    Button.Parent = TabBar
+    Button.Font = Enum.Font.Gotham
+    Button.TextSize = 18
+    Button.TextColor3 = Color3.fromRGB(155, 210, 255)
+    Button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Button.Size = UDim2.new(0, 100, 1, -10)
+    Button.AutoButtonColor = true
+    Button.BackgroundTransparency = 0.2
+    local BC = Instance.new("UICorner", Button)
+    BC.CornerRadius = UDim.new(0, 12)
+end
+
+-- 🎞️ Animation mở/đóng
 local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-local UserInputService = game:GetService("UserInputService")
+local menuOpen = false
 
-local function mk(parent, class, props)
-    local obj = Instance.new(class)
-    for k,v in pairs(props) do obj[k] = v end
-    obj.Parent = parent
-    return obj
+local function ToggleMenu()
+	menuOpen = not menuOpen
+	local tween = TweenService:Create(
+		UIScale,
+		TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+		{Scale = menuOpen and 1 or 0}
+	)
+	tween:Play()
+	if menuOpen then
+		MenuFrame.Visible = true
+	else
+		task.delay(0.4, function()
+			if not menuOpen then
+				MenuFrame.Visible = false
+			end
+		end)
+	end
 end
 
-local function tween(obj, props, time, style, dir)
-    return TweenService:Create(obj, TweenInfo.new(time or Config.AnimationTime, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out), props)
-end
-
-if CoreGui:FindFirstChild(Config.GuiName) then CoreGui[Config.GuiName]:Destroy() end
-
---============================
--- MAIN GUI
---============================
-local ScreenGui = mk(CoreGui, "ScreenGui", {Name = Config.GuiName, ResetOnSpawn = false})
-
-local Backdrop = mk(ScreenGui, "Frame", {
-    BackgroundColor3 = Color3.fromRGB(0,0,0),
-    BackgroundTransparency = 1,
-    Size = UDim2.new(1,0,1,0),
-    ZIndex = 2
-})
-
-local Window = mk(ScreenGui, "Frame", {
-    BackgroundColor3 = Color3.fromRGB(18, 22, 28),
-    Size = UDim2.new(0, Config.WindowWidth, 0, Config.WindowHeight),
-    AnchorPoint = Vector2.new(0.5,0.5),
-    Position = UDim2.new(1.2,0,0.5,0),
-    ZIndex = 5
-})
-mk(Window, "UICorner", {CornerRadius = UDim.new(0,18)})
-
---============================
--- TITLE BAR
---============================
-local TitleBar = mk(Window, "Frame", {Size = UDim2.new(1,0,0,54), BackgroundTransparency = 1})
-local Title = mk(TitleBar, "TextLabel", {
-    Text = Config.WindowTitle, Font = Enum.Font.GothamBold, TextSize = 20,
-    TextColor3 = Color3.fromRGB(180,240,255),
-    BackgroundTransparency = 1, Position = UDim2.new(0.03,0,0.1,0),
-    TextXAlignment = Enum.TextXAlignment.Left
-})
-local SubTitle = mk(TitleBar, "TextLabel", {
-    Text = Config.WindowSubTitle, Font = Enum.Font.Gotham, TextSize = 12,
-    TextColor3 = Color3.fromRGB(130,180,200),
-    BackgroundTransparency = 1, Position = UDim2.new(0.03,0,0.55,0),
-    TextXAlignment = Enum.TextXAlignment.Left
-})
-
-local CloseBtn = mk(TitleBar, "TextButton", {
-    Text = "✕", Size = UDim2.new(0,32,0,32), Position = UDim2.new(0.93,0,0.2,0),
-    BackgroundColor3 = Color3.fromRGB(40,46,58), TextColor3 = Color3.fromRGB(180,240,255),
-    Font = Enum.Font.GothamBold, TextSize = 16
-})
-mk(CloseBtn, "UICorner", {CornerRadius = UDim.new(0,8)})
-
--- Drag
-local dragging, dragInput, dragStart, startPos
-TitleBar.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = i.Position
-        startPos = Window.Position
-        i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dragging = false end end)
-    end
-end)
-TitleBar.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement then dragInput = i end end)
-UserInputService.InputChanged:Connect(function(i)
-    if i == dragInput and dragging then
-        local delta = i.Position - dragStart
-        Window.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
+-- 🔘 Click vào avatar để mở/đóng menu
+OpenButton.MouseButton1Click:Connect(function()
+	ToggleMenu()
 end)
 
---============================
--- TABS
---============================
-local TabsBar = mk(Window, "Frame", {
-    BackgroundTransparency = 1, Position = UDim2.new(0,0,0.13,0),
-    Size = UDim2.new(1,0,0,Config.TabHeight)
-})
-local TabsLayout = mk(TabsBar, "UIListLayout", {
-    FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0,6)
-})
-
-local Content = mk(Window, "Frame", {
-    BackgroundTransparency = 1, Position = UDim2.new(0,12,0.13+(Config.TabHeight/Config.WindowHeight),0),
-    Size = UDim2.new(1,-24,1,-(54+12+Config.TabHeight))
-})
-
-local function createTab(name, icon)
-    local btn = mk(TabsBar, "TextButton", {
-        Text = icon.." "..name,
-        Font = Enum.Font.GothamBold, TextSize = 14,
-        TextColor3 = Color3.fromRGB(180,240,255),
-        Size = UDim2.new(0,110,0,Config.TabHeight),
-        BackgroundColor3 = Color3.fromRGB(30,36,44)
-    })
-    mk(btn, "UICorner", {CornerRadius = UDim.new(0,10)})
-    return btn
-end
-
-local Tabs = {"Main","Troll","Admin","Game","Fun","Extra"}
-local Frames, Buttons = {},{}
-
-for _,n in pairs(Tabs) do
-    Buttons[n] = createTab(n, "•")
-    Frames[n] = mk(Content, "Frame", {Visible=false, BackgroundTransparency=1, Size=UDim2.new(1,0,1,0)})
-    mk(Frames[n],"UIListLayout",{Padding=UDim.new(0,8)})
-end
-
---============================
--- NÚT CHỨC NĂNG
---============================
-local function addBtn(parent, title, desc, callback)
-    local b = mk(parent, "TextButton", {
-        BackgroundColor3 = Color3.fromRGB(36,44,56),
-        Size = UDim2.new(1,0,0,44),
-        Text = ""
-    })
-    mk(b, "UICorner", {CornerRadius = UDim.new(0,10)})
-    mk(b,"TextLabel",{Text=title,Font=Enum.Font.GothamBold,TextSize=16,TextColor3=Color3.fromRGB(180,240,255),BackgroundTransparency=1,Position=UDim2.new(0.03,0,0,0),Size=UDim2.new(0.6,0,1,0),TextXAlignment=Enum.TextXAlignment.Left})
-    mk(b,"TextLabel",{Text=desc,Font=Enum.Font.Gotham,TextSize=12,TextColor3=Color3.fromRGB(130,180,200),BackgroundTransparency=1,Position=UDim2.new(0.03,0,0.5,0),Size=UDim2.new(0.95,0,0.5,0),TextXAlignment=Enum.TextXAlignment.Left})
-    b.MouseButton1Click:Connect(callback)
-    return b
-end
-
--- MAIN tab demo
-addBtn(Frames["Main"], "Copy TikTok Jack", "Sao chép link TikTok của Jack", function()
-    setclipboard("https://www.tiktok.com/@your_tiktok_here")
-end)
-
---============================
--- TAB SWITCH
---============================
-local current = nil
-local function showTab(n)
-    if current then Frames[current].Visible=false end
-    Frames[n].Visible=true
-    current = n
-end
-for n,b in pairs(Buttons) do b.MouseButton1Click:Connect(function() showTab(n) end) end
-showTab("Main")
-
---============================
--- ANIMATION
---============================
-local OpenBtn = mk(ScreenGui,"ImageButton",{
-    Image="http://www.roblox.com/asset/?id="..Config.ButtonImageId,
-    BackgroundTransparency=0.25,BackgroundColor3=Color3.fromRGB(0,0,0),
-    Size=UDim2.new(0,48,0,48),Position=UDim2.new(0.06,0,0.12,0)
-})
-mk(OpenBtn,"UICorner",{CornerRadius=UDim.new(1,10)})
-
-local open=false
-local function pulse(b)
-    local o=b.Size
-    tween(b,{Size=o+UDim2.new(0,6,0,6)},0.12,Enum.EasingStyle.Sine,Enum.EasingDirection.Out):Play()
-    task.wait(0.12)
-    tween(b,{Size=o},0.12,Enum.EasingStyle.Sine,Enum.EasingDirection.In):Play()
-end
-
-local function toggle()
-    pulse(OpenBtn)
-    open = not open
-    if open then
-        Backdrop.Visible=true
-        tween(Backdrop,{BackgroundTransparency=Config.BackdropMaxTransparency},Config.AnimationTime):Play()
-        tween(Window,{Position=UDim2.new(0.5,0,0.5,0)},Config.AnimationTime,Enum.EasingStyle.Back,Enum.EasingDirection.Out):Play()
-    else
-        tween(Backdrop,{BackgroundTransparency=1},Config.AnimationTime):Play()
-        tween(Window,{Position=UDim2.new(1.2,0,0.5,0)},Config.AnimationTime,Enum.EasingStyle.Back,Enum.EasingDirection.In):Play()
-        task.wait(Config.AnimationTime)
-        Backdrop.Visible=false
-    end
-end
-OpenBtn.MouseButton1Click:Connect(toggle)
-CloseBtn.MouseButton1Click:Connect(toggle)
-Backdrop.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 then if open then toggle() end end end)
-UserInputService.InputBegan:Connect(function(i,gp) if not gp and i.KeyCode==Enum.KeyCode.End then toggle() end end)
-
-print("JackUiPremium 💎 Dark Aqua loaded - by Sol 😎")
+print("✅ JackUiPremium v3 loaded — Click vào avatar để mở menu 💎")
