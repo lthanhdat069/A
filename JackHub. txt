@@ -1,270 +1,224 @@
--- Jack Hub 💎 - Full Hub template (Fluent UI)
--- Giữ nguyên giao diện thật, chỉ thêm hướng dẫn ngay bên cạnh dòng cần sửa (như yêu cầu).
--- Sol created this for Jack. Chú ý: thay URL loadstring bằng nguồn bạn tin tưởng.
+-- JackUiPremium 💎 Dark Aqua Edition
+-- Sol created this for Jack 😎
+-- An toàn: không có exploit; chỉ là GUI + khung sẵn để Jack tự dán script
 
 repeat task.wait() until game:IsLoaded()
 
--- 🟢 Nút mở menu chính
-local ScreenGui = Instance.new("ScreenGui")
-local ImageButton = Instance.new("ImageButton")
-local UICorner = Instance.new("UICorner")
-
-ScreenGui.Parent = game.CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Name = "JackHubGUI" -- 👈 đổi tên GUI nếu muốn (nhớ trùng trong code nếu đổi)
-
-ImageButton.Parent = ScreenGui
-ImageButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-ImageButton.BorderSizePixel = 0
-ImageButton.Position = UDim2.new(0.10615778, 0, 0.16217947, 0)
-ImageButton.Size = UDim2.new(0, 40, 0, 40)
-ImageButton.Draggable = true
-ImageButton.Image = "http://www.roblox.com/asset/?id=103173399598412"  -- 👈 đổi ID ảnh nút mở menu tại đây (ảnh roblox)
-ImageButton.Name = "OpenMenuButton" -- 👈 đổi tên nút nếu muốn
-
-UICorner.CornerRadius = UDim.new(1, 10)
-UICorner.Parent = ImageButton
-
--- Mở/đóng menu bằng phím End
-ImageButton.MouseButton1Down:Connect(function()
-    -- Gửi sự kiện giả để minimize/maximize theo Fluent thiết lập
-	game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.End, false, game)
-end)
-
--- 🟣 Tải Fluent UI (UI library)
--- Nếu bạn muốn sử dụng thư viện Fluent khác, đổi URL bên dưới
-local successFluent, Fluent = pcall(function()
-    return loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-end)
-
-if not successFluent then
-    warn("Không thể tải Fluent từ URL mặc định. Nếu bạn có thư viện UI khác, thay URL trong mã. (Dòng: loadstring Fluent)")
-    -- Bạn có thể dừng ở đây hoặc tiếp tục với UI cơ bản
-end
-
-repeat wait() until game:IsLoaded()
-
--- 🪟 Cửa sổ chính
-local Window = Fluent:CreateWindow({
-	Title = "Jack Hub 💎",         -- 👈 đổi thành tên script của bạn
-	SubTitle = "Script vip xịn nhất từ Jack", -- 👈 đổi mô tả phụ
-	TabWidth = 157,
-	Size = UDim2.fromOffset(450, 300),
-	Acrylic = true,
-	Theme = "Aqua",                   -- 👈 đổi màu chủ đạo: Amethyst, Dark, Aqua, Light, Rose, Emerald, Crimson, Ocean
-	MinimizeKey = Enum.KeyCode.End
-})
-
--- 📑 Tạo 6 tab mặc định (theo cấu hình bạn xác nhận)
-local Tabs = {
-	Main    = Window:AddTab({ Title = "Main" }),   -- 👈 đổi tên tab nếu muốn
-	Troll   = Window:AddTab({ Title = "Troll" }),
-	Admin   = Window:AddTab({ Title = "Admin" }),
-	Game    = Window:AddTab({ Title = "Game" }),
-	Fun     = Window:AddTab({ Title = "Fun" }),
-	Extra   = Window:AddTab({ Title = "Extra" })
+--============================
+-- CONFIG
+--============================
+local Config = {
+    GuiName = "JackUiPremium",
+    ButtonImageId = "103173399598412", 
+    WindowTitle = "JackUiPremium 💎",
+    WindowSubTitle = "Dark Aqua Style by Sol",
+    Theme = "Dark",
+    WindowWidth = 660,
+    WindowHeight = 390,
+    TabHeight = 46,
+    AnimationTime = 0.28,
+    BackdropMaxTransparency = 0.6,
+    TopBarIconSize = 20
 }
 
-------------------------------------------------
--- TAB Main: Các script cơ bản / tiện ích
-------------------------------------------------
-Tabs.Main:AddButton({
-	Title = "Copy TikTok Jack",              -- 👈 tên nút
-	Description = "Sao chép link TikTok của Jack",-- 👈 mô tả nút
-	Callback = function()
-		setclipboard("https://www.tiktok.com/@your_tiktok_here")  -- 👈 thay bằng link TikTok của bạn
-	end
+--============================
+-- USER SCRIPTS (Jack tự dán)
+--============================
+local UserScripts = {
+    Fly = "loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()",
+    Invisible = "loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))()",
+    WalkOnAir = "loadstring(game:HttpGet("https://pastefy.app/Qc1ZIUwO/raw", true))()",
+    InfiniteYield = "loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))()"
+}
+
+--============================
+-- SERVICE SETUP
+--============================
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+
+local function mk(parent, class, props)
+    local obj = Instance.new(class)
+    for k,v in pairs(props) do obj[k] = v end
+    obj.Parent = parent
+    return obj
+end
+
+local function tween(obj, props, time, style, dir)
+    return TweenService:Create(obj, TweenInfo.new(time or Config.AnimationTime, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out), props)
+end
+
+if CoreGui:FindFirstChild(Config.GuiName) then CoreGui[Config.GuiName]:Destroy() end
+
+--============================
+-- MAIN GUI
+--============================
+local ScreenGui = mk(CoreGui, "ScreenGui", {Name = Config.GuiName, ResetOnSpawn = false})
+
+local Backdrop = mk(ScreenGui, "Frame", {
+    BackgroundColor3 = Color3.fromRGB(0,0,0),
+    BackgroundTransparency = 1,
+    Size = UDim2.new(1,0,1,0),
+    ZIndex = 2
 })
 
-Tabs.Main:AddButton({
-	Title = "Server Hop (placeholder)",
-	Description = "Ví dụ: chức năng server hop (bạn phải thay implementation)", -- 👈 mô tả
-	Callback = function()
-		-- 👇 Đây là vùng placeholder: thay bằng function server hop cụ thể nếu bạn có
-		warn("Server Hop được gọi — thay bằng implementation của bạn nếu cần.")
-	end
+local Window = mk(ScreenGui, "Frame", {
+    BackgroundColor3 = Color3.fromRGB(18, 22, 28),
+    Size = UDim2.new(0, Config.WindowWidth, 0, Config.WindowHeight),
+    AnchorPoint = Vector2.new(0.5,0.5),
+    Position = UDim2.new(1.2,0,0.5,0),
+    ZIndex = 5
+})
+mk(Window, "UICorner", {CornerRadius = UDim.new(0,18)})
+
+--============================
+-- TITLE BAR
+--============================
+local TitleBar = mk(Window, "Frame", {Size = UDim2.new(1,0,0,54), BackgroundTransparency = 1})
+local Title = mk(TitleBar, "TextLabel", {
+    Text = Config.WindowTitle, Font = Enum.Font.GothamBold, TextSize = 20,
+    TextColor3 = Color3.fromRGB(180,240,255),
+    BackgroundTransparency = 1, Position = UDim2.new(0.03,0,0.1,0),
+    TextXAlignment = Enum.TextXAlignment.Left
+})
+local SubTitle = mk(TitleBar, "TextLabel", {
+    Text = Config.WindowSubTitle, Font = Enum.Font.Gotham, TextSize = 12,
+    TextColor3 = Color3.fromRGB(130,180,200),
+    BackgroundTransparency = 1, Position = UDim2.new(0.03,0,0.55,0),
+    TextXAlignment = Enum.TextXAlignment.Left
 })
 
-Tabs.Main:AddButton({
-	Title = "Open Discord",
-	Description = "Sao chép link Discord của bạn",
-	Callback = function()
-		setclipboard("https://discord.gg/your_invite_here") -- 👈 thay link Discord
-	end
+local CloseBtn = mk(TitleBar, "TextButton", {
+    Text = "✕", Size = UDim2.new(0,32,0,32), Position = UDim2.new(0.93,0,0.2,0),
+    BackgroundColor3 = Color3.fromRGB(40,46,58), TextColor3 = Color3.fromRGB(180,240,255),
+    Font = Enum.Font.GothamBold, TextSize = 16
+})
+mk(CloseBtn, "UICorner", {CornerRadius = UDim.new(0,8)})
+
+-- Drag
+local dragging, dragInput, dragStart, startPos
+TitleBar.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = i.Position
+        startPos = Window.Position
+        i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dragging = false end end)
+    end
+end)
+TitleBar.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement then dragInput = i end end)
+UserInputService.InputChanged:Connect(function(i)
+    if i == dragInput and dragging then
+        local delta = i.Position - dragStart
+        Window.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+--============================
+-- TABS
+--============================
+local TabsBar = mk(Window, "Frame", {
+    BackgroundTransparency = 1, Position = UDim2.new(0,0,0.13,0),
+    Size = UDim2.new(1,0,0,Config.TabHeight)
+})
+local TabsLayout = mk(TabsBar, "UIListLayout", {
+    FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0,6)
 })
 
-------------------------------------------------
--- TAB Troll: các nút vui/troll (ví dụ, an toàn)
-------------------------------------------------
-Tabs.Troll:AddButton({
-	Title = "Make Player Float (demo)",
-	Description = "Demo effect troll (không hại) - chọn mục tiêu trong game để áp dụng",
-	Callback = function()
-		local plr = game.Players.LocalPlayer
-		if plr and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-			local hrp = plr.Character.HumanoidRootPart
-			local old = hrp.Anchored
-			hrp.Anchored = true
-			task.delay(2, function() hrp.Anchored = old end)
-			-- 👈 chỉnh 2 -> số giây muốn neo người chơi
-		else
-			warn("Không tìm thấy character để demo effect.")
-		end
-	end
+local Content = mk(Window, "Frame", {
+    BackgroundTransparency = 1, Position = UDim2.new(0,12,0.13+(Config.TabHeight/Config.WindowHeight),0),
+    Size = UDim2.new(1,-24,1,-(54+12+Config.TabHeight))
 })
 
-Tabs.Troll:AddButton({
-	Title = "Fake Lag (local only)",
-	Description = "Chỉ là hiệu ứng local để gây cười, không ảnh hưởng server.",
-	Callback = function()
-		for i = 1, 6 do
-			game:GetService("RunService").Stepped:Wait()
-		end
-		warn("Fake lag (local) completed.")
-	end
+local function createTab(name, icon)
+    local btn = mk(TabsBar, "TextButton", {
+        Text = icon.." "..name,
+        Font = Enum.Font.GothamBold, TextSize = 14,
+        TextColor3 = Color3.fromRGB(180,240,255),
+        Size = UDim2.new(0,110,0,Config.TabHeight),
+        BackgroundColor3 = Color3.fromRGB(30,36,44)
+    })
+    mk(btn, "UICorner", {CornerRadius = UDim.new(0,10)})
+    return btn
+end
+
+local Tabs = {"Main","Troll","Admin","Game","Fun","Extra"}
+local Frames, Buttons = {},{}
+
+for _,n in pairs(Tabs) do
+    Buttons[n] = createTab(n, "•")
+    Frames[n] = mk(Content, "Frame", {Visible=false, BackgroundTransparency=1, Size=UDim2.new(1,0,1,0)})
+    mk(Frames[n],"UIListLayout",{Padding=UDim.new(0,8)})
+end
+
+--============================
+-- NÚT CHỨC NĂNG
+--============================
+local function addBtn(parent, title, desc, callback)
+    local b = mk(parent, "TextButton", {
+        BackgroundColor3 = Color3.fromRGB(36,44,56),
+        Size = UDim2.new(1,0,0,44),
+        Text = ""
+    })
+    mk(b, "UICorner", {CornerRadius = UDim.new(0,10)})
+    mk(b,"TextLabel",{Text=title,Font=Enum.Font.GothamBold,TextSize=16,TextColor3=Color3.fromRGB(180,240,255),BackgroundTransparency=1,Position=UDim2.new(0.03,0,0,0),Size=UDim2.new(0.6,0,1,0),TextXAlignment=Enum.TextXAlignment.Left})
+    mk(b,"TextLabel",{Text=desc,Font=Enum.Font.Gotham,TextSize=12,TextColor3=Color3.fromRGB(130,180,200),BackgroundTransparency=1,Position=UDim2.new(0.03,0,0.5,0),Size=UDim2.new(0.95,0,0.5,0),TextXAlignment=Enum.TextXAlignment.Left})
+    b.MouseButton1Click:Connect(callback)
+    return b
+end
+
+-- MAIN tab demo
+addBtn(Frames["Main"], "Copy TikTok Jack", "Sao chép link TikTok của Jack", function()
+    setclipboard("https://www.tiktok.com/@your_tiktok_here")
+end)
+
+--============================
+-- TAB SWITCH
+--============================
+local current = nil
+local function showTab(n)
+    if current then Frames[current].Visible=false end
+    Frames[n].Visible=true
+    current = n
+end
+for n,b in pairs(Buttons) do b.MouseButton1Click:Connect(function() showTab(n) end) end
+showTab("Main")
+
+--============================
+-- ANIMATION
+--============================
+local OpenBtn = mk(ScreenGui,"ImageButton",{
+    Image="http://www.roblox.com/asset/?id="..Config.ButtonImageId,
+    BackgroundTransparency=0.25,BackgroundColor3=Color3.fromRGB(0,0,0),
+    Size=UDim2.new(0,48,0,48),Position=UDim2.new(0.06,0,0.12,0)
 })
+mk(OpenBtn,"UICorner",{CornerRadius=UDim.new(1,10)})
 
-------------------------------------------------
--- TAB Admin: các script quyền (PLACEHOLDERS an toàn)
--- LƯU Ý: nếu bạn muốn load Infinite Yield hoặc CMD-X, đổi URL bên dưới tại chỗ chỉ dẫn.
-------------------------------------------------
-Tabs.Admin:AddButton({
-	Title = "Infinite Yield (example)",
-	Description = "Ví dụ: thay URL bằng raw script Infinite Yield nếu bạn muốn",
-	Callback = function()
-		-- Nếu bạn có URL tin cậy, bỏ comment dòng bên dưới và thay link:
-		-- loadstring(game:HttpGet("https://raw.githubusercontent.com/username/repo/main/infiniteyield.lua", true))()
-		-- 👈 THAY link ở trên bằng link raw tin cậy của bạn (nếu muốn)
-		warn("Infinite Yield placeholder. Thay loadstring(...) bằng URL của bạn nếu cần.")
-	end
-})
+local open=false
+local function pulse(b)
+    local o=b.Size
+    tween(b,{Size=o+UDim2.new(0,6,0,6)},0.12,Enum.EasingStyle.Sine,Enum.EasingDirection.Out):Play()
+    task.wait(0.12)
+    tween(b,{Size=o},0.12,Enum.EasingStyle.Sine,Enum.EasingDirection.In):Play()
+end
 
-Tabs.Admin:AddButton({
-	Title = "CMD-X (example)",
-	Description = "Ví dụ khác cho tool admin. Thay link nếu muốn.",
-	Callback = function()
-		-- loadstring(game:HttpGet("https://example.com/cmdx.lua"))() -- 👈 thay URL ở đây (nếu có)
-		warn("CMD-X placeholder. Thay URL trong code nếu có.")
-	end
-})
+local function toggle()
+    pulse(OpenBtn)
+    open = not open
+    if open then
+        Backdrop.Visible=true
+        tween(Backdrop,{BackgroundTransparency=Config.BackdropMaxTransparency},Config.AnimationTime):Play()
+        tween(Window,{Position=UDim2.new(0.5,0,0.5,0)},Config.AnimationTime,Enum.EasingStyle.Back,Enum.EasingDirection.Out):Play()
+    else
+        tween(Backdrop,{BackgroundTransparency=1},Config.AnimationTime):Play()
+        tween(Window,{Position=UDim2.new(1.2,0,0.5,0)},Config.AnimationTime,Enum.EasingStyle.Back,Enum.EasingDirection.In):Play()
+        task.wait(Config.AnimationTime)
+        Backdrop.Visible=false
+    end
+end
+OpenBtn.MouseButton1Click:Connect(toggle)
+CloseBtn.MouseButton1Click:Connect(toggle)
+Backdrop.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 then if open then toggle() end end end)
+UserInputService.InputBegan:Connect(function(i,gp) if not gp and i.KeyCode==Enum.KeyCode.End then toggle() end end)
 
-------------------------------------------------
--- TAB Game: script theo game (mỗi nút là placeholder an toàn)
-------------------------------------------------
-Tabs.Game:AddButton({
-	Title = "Blox Fruits Helper (placeholder)",
-	Description = "Tự thêm script/farm tùy ý - hãy dùng source bạn tin tưởng",
-	Callback = function()
-		-- Ví dụ: nếu bạn có script auto-farm Blox Fruits, đặt loadstring ở đây
-		-- loadstring(game:HttpGet("https://raw.githubusercontent.com/your/repo/main/bloxfruits.lua", true))()
-		warn("Blox Fruits placeholder. Thay bằng loadstring URL của bạn.")
-	end
-})
-
-Tabs.Game:AddButton({
-	Title = "Da Hood Helper (placeholder)",
-	Description = "Đặt script Da Hood nếu muốn",
-	Callback = function()
-		warn("Da Hood placeholder - thay bằng script thực tế nếu có.")
-	end
-})
-
-------------------------------------------------
--- TAB Fun: bay, noclip, invis (ví dụ an toàn / placeholder)
-------------------------------------------------
-Tabs.Fun:AddButton({
-	Title = "Fly (local demo)",
-	Description = "Demo fly local (không dùng exploit mạng). Thay bằng script đầy đủ nếu muốn.",
-	Callback = function()
-		local plr = game.Players.LocalPlayer
-		if not plr or not plr.Character then return end
-		local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid.PlatformStand = true
-			task.delay(2, function() humanoid.PlatformStand = false end)
-			-- 👈 2 giây demo: chỉnh thời gian nếu cần
-		end
-	end
-})
-
-Tabs.Fun:AddButton({
-	Title = "Noclip (toggle local)",
-	Description = "Noclip local-demo: toggle CanCollide. Chỉ demo local.",
-	Callback = function()
-		local plr = game.Players.LocalPlayer
-		if not plr or not plr.Character then return end
-		for _,v in pairs(plr.Character:GetDescendants()) do
-			if v:IsA("BasePart") then
-				v.CanCollide = not v.CanCollide
-			end
-		end
-		warn("Toggled local noclip CanCollide state. (Demo)")
-	end
-})
-
-Tabs.Fun:AddButton({
-	Title = "Invisible (local)",
-	Description = "Làm mờ local avatar (demo).",
-	Callback = function()
-		local plr = game.Players.LocalPlayer
-		if not plr or not plr.Character then return end
-		for _,v in pairs(plr.Character:GetDescendants()) do
-			if v:IsA("BasePart") then
-				v.Transparency = 1
-			elseif v:IsA("Decal") then
-				v.Transparency = 1
-			end
-		end
-		task.delay(3, function()
-			-- Khi demo xong, reset transparency về 0 (nếu muốn)
-			-- Lưu ý: nếu avatar có cosmetics, có thể cần xử lý khác
-			for _,v in pairs(plr.Character:GetDescendants()) do
-				if v:IsA("BasePart") then
-					v.Transparency = 0
-				elseif v:IsA("Decal") then
-					v.Transparency = 0
-				end
-			end
-		end)
-	end
-})
-
-------------------------------------------------
--- TAB Extra: liên kết, hướng dẫn, cập nhật
-------------------------------------------------
-Tabs.Extra:AddButton({
-	Title = "Hướng dẫn chỉnh sửa script",
-	Description = "Mở clipboard với hướng dẫn cơ bản",
-	Callback = function()
-		local guide = [[Hướng dẫn nhanh chỉnh sửa Jack Hub:
-- Đổi tên menu: sửa Title trong CreateWindow (dòng Window:CreateWindow).
-- Đổi ảnh nút mở menu: thay ID ở ImageButton.Image.
-- Thêm script: tại các nút placeholder, thay loadstring(...) bằng URL raw script của bạn.
-- Luôn kiểm tra nguồn script trước khi chạy.
-]]
-		setclipboard(guide)
-		warn("Hướng dẫn đã được sao chép vào clipboard.")
-	end
-})
-
-Tabs.Extra:AddButton({
-	Title = "Sao chép ID nút",
-	Description = "Sao chép ID asset của nút mở menu để bạn thay đổi nhanh",
-	Callback = function()
-		setclipboard("103173399598412") -- 👈 thay bằng ID mặc định hoặc của bạn
-	end
-})
-
--- Thêm một footer nhỏ trong GUI (ví dụ)
-local Footer = Instance.new("TextLabel")
-Footer.Parent = ScreenGui
-Footer.BackgroundTransparency = 1
-Footer.Position = UDim2.new(0.02, 0, 0.95, 0)
-Footer.Size = UDim2.new(0.3, 0, 0.04, 0)
-Footer.Text = "Jack Hub 💎 - Sol built"
-Footer.TextColor3 = Color3.fromRGB(200, 200, 255)
-Footer.TextScaled = true
-Footer.Font = Enum.Font.Gotham
-
--- Kết thúc script: thông báo ready
-print("Jack Hub 💎 loaded. Kiểm tra các chỗ có chú thích '-- 👈' để tùy chỉnh theo ý bạn.")
+print("JackUiPremium 💎 Dark Aqua loaded - by Sol 😎")
