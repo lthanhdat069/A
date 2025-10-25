@@ -1,160 +1,339 @@
--- 🌌 DAT DZ 💧 RPG HUB v4.1 — AQUA VIOLET DELUXE
--- GUI Framework & Design by DatDz 😎💧
-repeat task.wait() until game:IsLoaded()
+-- Dat Dz 💧 RPG Hub — Aqua Violet Chill Edition v4.5 (Safe UI version)
+-- Mô phỏng giao diện, intro, glow, tabs ngang, avatar toggle — KHÔNG có loadstring/HttpGet
 
------------------------------------------------------
--- 🎬 INTRO + ÂM NHẠC
------------------------------------------------------
+local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local IntroGui = Instance.new("ScreenGui", game.CoreGui)
-IntroGui.IgnoreGuiInset = true
-IntroGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+local StarterGui = game:GetService("StarterGui")
+local SoundService = game:GetService("SoundService")
+local RunService = game:GetService("RunService")
 
-local Background = Instance.new("Frame", IntroGui)
-Background.BackgroundColor3 = Color3.fromRGB(10, 10, 20)
-Background.BackgroundTransparency = 1
-Background.Size = UDim2.new(1, 0, 1, 0)
+local player = Players.LocalPlayer
 
-local Logo = Instance.new("TextLabel", IntroGui)
-Logo.AnchorPoint = Vector2.new(0.5, 0.5)
-Logo.Position = UDim2.new(0.5, 0, 0.5, 0)
-Logo.Text = "💧 Dat Dz RPG Hub 💧"
-Logo.TextColor3 = Color3.fromRGB(120, 180, 255)
-Logo.Font = Enum.Font.GothamBold
-Logo.TextSize = 48
-Logo.TextTransparency = 1
-Logo.BackgroundTransparency = 1
-local UIStroke = Instance.new("UIStroke", Logo)
-UIStroke.Color = Color3.fromRGB(170, 130, 255)
-UIStroke.Thickness = 1.5
-Logo.Parent = Background
-
-local Sound = Instance.new("Sound", game.SoundService)
-Sound.SoundId = "rbxassetid://74697049223758"
-Sound.Volume = 1
-Sound.Looped = false
-Sound:Play()
-
-TweenService:Create(Background, TweenInfo.new(0.8), { BackgroundTransparency = 0.4 }):Play()
-TweenService:Create(Logo, TweenInfo.new(1, Enum.EasingStyle.Quad), { TextTransparency = 0 }):Play()
-task.wait(3.5)
-TweenService:Create(Logo, TweenInfo.new(1), { TextTransparency = 1 }):Play()
-TweenService:Create(Background, TweenInfo.new(1), { BackgroundTransparency = 1 }):Play()
-task.wait(1)
-IntroGui:Destroy()
-
------------------------------------------------------
--- 🌀 MENU CHÍNH
------------------------------------------------------
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-local ImageButton = Instance.new("ImageButton")
-local UICorner = Instance.new("UICorner")
-
-ImageButton.Parent = ScreenGui
-ImageButton.Size = UDim2.new(0, 45, 0, 45)
-ImageButton.Position = UDim2.new(0.05, 0, 0.2, 0)
-ImageButton.Image = "rbxassetid://103173399598412"
-ImageButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-ImageButton.AutoButtonColor = true
-ImageButton.Draggable = true
-UICorner.CornerRadius = UDim.new(1, 10)
-UICorner.Parent = ImageButton
-
------------------------------------------------------
--- 🪄 FLUENT UI
------------------------------------------------------
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-repeat task.wait() until game:IsLoaded()
-
-local Window = Fluent:CreateWindow({
-	Title = "Dat Dz 💧 RPG Hub",
-	SubTitle = "Aqua Violet Edition",
-	TabWidth = 160,
-	Size = UDim2.fromOffset(520, 340),
-	Acrylic = true,
-	Theme = "Dark",
-	MinimizeKey = Enum.KeyCode.End
-})
-
------------------------------------------------------
--- 📑 TAB NGANG
------------------------------------------------------
-local Tabs = {
-	Custom = Window:AddTab({ Title = "🧩 Nhập Script" }),
-	Common = Window:AddTab({ Title = "⚡ Script Phổ Biến" }),
-}
-
------------------------------------------------------
--- 🧩 TAB 1: NHẬP SCRIPT
------------------------------------------------------
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 450, 0, 150)
-Frame.Position = UDim2.new(0, 25, 0, 60)
-Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
-Frame.Parent = Tabs.Custom.Container
-Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
-
-local Box = Instance.new("TextBox", Frame)
-Box.Size = UDim2.new(1, -20, 1, -50)
-Box.Position = UDim2.new(0, 10, 0, 10)
-Box.PlaceholderText = "Dán script của bạn vào đây..."
-Box.TextColor3 = Color3.fromRGB(180, 140, 255)
-Box.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
-Box.BackgroundTransparency = 0.3
-Box.ClearTextOnFocus = false
-Box.MultiLine = true
-Box.TextWrapped = true
-Box.Font = Enum.Font.Gotham
-Box.TextYAlignment = Enum.TextYAlignment.Top
-Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 8)
-
-local RunButton = Instance.new("TextButton", Frame)
-RunButton.Size = UDim2.new(0, 120, 0, 35)
-RunButton.Position = UDim2.new(0.5, -60, 1, -40)
-RunButton.BackgroundColor3 = Color3.fromRGB(100, 70, 180)
-RunButton.Text = "▶️ Chạy Script"
-RunButton.TextColor3 = Color3.new(1, 1, 1)
-RunButton.Font = Enum.Font.GothamBold
-RunButton.TextSize = 14
-Instance.new("UICorner", RunButton).CornerRadius = UDim.new(0, 8)
-
-RunButton.MouseButton1Click:Connect(function()
-	if Box.Text ~= "" then
-		print("[DatDz Hub] Script đã được nhập!") -- Thay dòng này bằng loadstring nếu dùng executor
-	else
-		game.StarterGui:SetCore("SendNotification", {
-			Title = "⚠️ Dat Dz Hub";
-			Text = "Bạn chưa nhập script!";
-			Duration = 3;
-		})
-	end
-end)
-
------------------------------------------------------
--- ⚡ TAB 2: SCRIPT PHỔ BIẾN
------------------------------------------------------
-local scripts = {
-	{ title = "💨 Fly V3", desc = "Bay mượt, nhanh, nhẹ", url = "--[[ loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()	{ title = "👑 Infinite Yield", desc = "Admin đa năng", url = "--[[ loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))() ]]" },
-	{ title = "🌀 Invisible FE", desc = "Tàng hình chuẩn FE", url = "--[[ loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Awesome-Invisible-man-21074"))() ]]" },
-	{ title = "🚶‍♂️ Đi Trên Không", desc = "Bước đi giữa không trung siêu mượt", url = "--[[ loadstring(game:HttpGet("https://pastefy.app/Qc1ZIUwO/raw", true))() ]]" },
-}
-
-for _, s in pairs(scripts) do
-	Tabs.Common:AddButton({
-		Title = s.title,
-		Description = s.desc,
-		Callback = function()
-			print("▶️ Đã chọn: " .. s.title)
-			--[[ loadstring(game:HttpGet(s.url))() ]] -- Dán script thật vào đây
-		end
-	})
+-- Utilities
+local function notify(title, text, duration)
+	duration = duration or 3
+	pcall(function()
+		StarterGui:SetCore("SendNotification", {Title = title, Text = text, Duration = duration})
+	end)
 end
 
------------------------------------------------------
--- 🪄 BẬT/TẮT MENU BẰNG AVATAR
------------------------------------------------------
-local MenuVisible = true
-ImageButton.MouseButton1Click:Connect(function()
-	MenuVisible = not MenuVisible
-	Window.Window.Visible = MenuVisible
+local function trySetClipboard(text)
+	local ok = pcall(function() setclipboard(text) end)
+	return ok
+end
+
+-- GUI factory so we can recreate on respawn
+local function CreateDatDzHub(parent)
+	-- cleanup existing
+	if parent:FindFirstChild("DatDzDatHub_UI") then
+		parent.DatDzDatHub_UI:Destroy()
+	end
+
+	local screen = Instance.new("ScreenGui")
+	screen.Name = "DatDzDatHub_UI"
+	screen.ResetOnSpawn = false
+	screen.Parent = parent
+	screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+	-- ---------- Intro ----------
+	local introFrame = Instance.new("Frame", screen)
+	introFrame.Name = "IntroFrame"
+	introFrame.Size = UDim2.new(1,0,1,0)
+	introFrame.BackgroundColor3 = Color3.fromRGB(12,8,18)
+	introFrame.BackgroundTransparency = 1
+
+	-- pulse glow image (soft)
+	local pulse = Instance.new("ImageLabel", introFrame)
+	pulse.AnchorPoint = Vector2.new(0.5,0.5)
+	pulse.Position = UDim2.new(0.5,0,0.45,0)
+	pulse.Size = UDim2.new(0.6,0,0.35,0)
+	pulse.BackgroundTransparency = 1
+	pulse.Image = "rbxassetid://4996891970"
+	pulse.ImageColor3 = Color3.fromRGB(140,90,255)
+	pulse.ImageTransparency = 0.95
+
+	local logo = Instance.new("TextLabel", introFrame)
+	logo.AnchorPoint = Vector2.new(0.5,0.5)
+	logo.Position = UDim2.new(0.5,0,0.45,0)
+	logo.BackgroundTransparency = 1
+	logo.Text = "Dat Dz 💧 RPG Hub"
+	logo.Font = Enum.Font.GothamBold
+	logo.TextSize = 44
+	logo.TextColor3 = Color3.fromRGB(150,180,255)
+	logo.TextTransparency = 1
+	logo.TextScaled = true
+	local uistroke = Instance.new("UIStroke", logo)
+	uistroke.Color = Color3.fromRGB(170,130,255)
+	uistroke.Thickness = 1.4
+
+	-- subtitle
+	local sub = Instance.new("TextLabel", introFrame)
+	sub.AnchorPoint = Vector2.new(0.5,0)
+	sub.Position = UDim2.new(0.5,0,0.55,0)
+	sub.BackgroundTransparency = 1
+	sub.Text = "Delta Stable v4.5 — Aqua Violet Chill"
+	sub.Font = Enum.Font.Gotham
+	sub.TextSize = 18
+	sub.TextColor3 = Color3.fromRGB(185,140,255)
+	sub.TextTransparency = 1
+	sub.RichText = false
+	sub.TextScaled = true
+
+	-- sound intro (play once)
+	local introSound = Instance.new("Sound")
+	introSound.SoundId = "rbxassetid://74697049223758" -- Raining Tacos
+	introSound.Volume = 0.9
+	introSound.Looped = false
+	introSound.Parent = SoundService
+	pcall(function() introSound:Play() end)
+
+	-- animate intro (3 seconds total)
+	TweenService:Create(introFrame, TweenInfo.new(0.5), {BackgroundTransparency = 0.25}):Play()
+	TweenService:Create(logo, TweenInfo.new(0.9, Enum.EasingStyle.Quad), {TextTransparency = 0}):Play()
+	TweenService:Create(sub, TweenInfo.new(1.1, Enum.EasingStyle.Quad), {TextTransparency = 0}):Play()
+	-- subtle pulse
+	local pulseTween = TweenService:Create(pulse, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, -1, true), {ImageTransparency = 0.7})
+	pulseTween:Play()
+	task.delay(3, function()
+		-- fade out
+		TweenService:Create(logo, TweenInfo.new(0.9), {TextTransparency = 1}):Play()
+		TweenService:Create(sub, TweenInfo.new(0.9), {TextTransparency = 1}):Play()
+		TweenService:Create(introFrame, TweenInfo.new(0.9), {BackgroundTransparency = 1}):Play()
+		task.wait(0.95)
+		if introFrame and introFrame.Parent then introFrame:Destroy() end
+	end)
+
+	-- ---------- Main UI ----------
+	-- container (center)
+	local container = Instance.new("Frame", screen)
+	container.Name = "DatDzContainer"
+	container.AnchorPoint = Vector2.new(0.5,0.5)
+	container.Position = UDim2.new(0.5,0,0.5,0)
+	container.Size = UDim2.new(0, 520, 0, 360)
+	container.BackgroundColor3 = Color3.fromRGB(22,18,32)
+	container.BackgroundTransparency = 0.12
+	container.Visible = false -- hidden until avatar pressed
+	Instance.new("UICorner", container).CornerRadius = UDim.new(0, 14)
+	-- subtle glow (ImageLabel)
+	local glow = Instance.new("ImageLabel", container)
+	glow.Size = UDim2.new(1.12,0,1.12,0)
+	glow.Position = UDim2.new(-0.06,0,-0.06,0)
+	glow.BackgroundTransparency = 1
+	glow.Image = "rbxassetid://4996891970"
+	glow.ImageColor3 = Color3.fromRGB(140,90,255)
+	glow.ImageTransparency = 0.92
+	glow.ZIndex = -1
+
+	-- header
+	local header = Instance.new("Frame", container)
+	header.Size = UDim2.new(1,0,0,56)
+	header.Position = UDim2.new(0,0,0,0)
+	header.BackgroundColor3 = Color3.fromRGB(36,28,56)
+	header.BackgroundTransparency = 0
+	Instance.new("UICorner", header).CornerRadius = UDim.new(0, 12)
+	local title = Instance.new("TextLabel", header)
+	title.Size = UDim2.new(1,0,1,0)
+	title.BackgroundTransparency = 1
+	title.Font = Enum.Font.GothamBold
+	title.Text = "Dat Dz 💧 RPG Hub"
+	title.TextColor3 = Color3.fromRGB(185,150,255)
+	title.TextScaled = true
+
+	-- top tabs bar (horizontal)
+	local tabsBar = Instance.new("Frame", container)
+	tabsBar.Size = UDim2.new(1, -40, 0, 44)
+	tabsBar.Position = UDim2.new(0,20,0,66)
+	tabsBar.BackgroundTransparency = 1
+
+	local function MakeTabLabel(txt, posX)
+		local btn = Instance.new("TextButton", tabsBar)
+		btn.Size = UDim2.new(0, 220, 1, 0)
+		btn.Position = UDim2.new(0, (posX-1)*220, 0, 0)
+		btn.Text = txt
+		btn.Font = Enum.Font.GothamBold
+		btn.TextColor3 = Color3.fromRGB(210,200,255)
+		btn.BackgroundColor3 = Color3.fromRGB(34,25,50)
+		btn.AutoButtonColor = true
+		btn.TextScaled = true
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
+		return btn
+	end
+
+	local tabInputBtn = MakeTabLabel("🧩 Nhập Script", 1)
+	local tabPopularBtn = MakeTabLabel("⚡ Script Phổ Biến", 2)
+
+	-- content frames
+	local content = Instance.new("Frame", container)
+	content.Size = UDim2.new(1, -40, 1, -140)
+	content.Position = UDim2.new(0,20,0,120)
+	content.BackgroundTransparency = 1
+
+	local pageInput = Instance.new("Frame", content)
+	pageInput.Size = UDim2.new(1,0,1,0); pageInput.BackgroundTransparency = 1; pageInput.Visible = true
+	local pagePopular = Instance.new("Frame", content)
+	pagePopular.Size = UDim2.new(1,0,1,0); pagePopular.BackgroundTransparency = 1; pagePopular.Visible = false
+
+	-- Page Input elements
+	local inputBox = Instance.new("TextBox", pageInput)
+	inputBox.Size = UDim2.new(1, -20, 0, 160)
+	inputBox.Position = UDim2.new(0,10,0,0)
+	inputBox.PlaceholderText = "Dán script code hoặc dán link raw vào đây..."
+	inputBox.TextWrapped = true
+	inputBox.ClearTextOnFocus = false
+	inputBox.Font = Enum.Font.Code
+	inputBox.TextColor3 = Color3.fromRGB(210,200,255)
+	inputBox.BackgroundColor3 = Color3.fromRGB(30,22,40)
+	Instance.new("UICorner", inputBox).CornerRadius = UDim.new(0,8)
+
+	local runBtn = Instance.new("TextButton", pageInput)
+	runBtn.Size = UDim2.new(0,160,0,36)
+	runBtn.Position = UDim2.new(0.5, -80, 0, 170)
+	runBtn.Text = "📋 Sao chép (Clipboard)"
+	runBtn.Font = Enum.Font.GothamBold
+	runBtn.TextColor3 = Color3.fromRGB(255,255,255)
+	runBtn.BackgroundColor3 = Color3.fromRGB(110,70,200)
+	Instance.new("UICorner", runBtn).CornerRadius = UDim.new(0,8)
+
+	runBtn.MouseButton1Click:Connect(function()
+		local t = inputBox.Text or ""
+		if (t or ""):match("%S") then
+			local ok = trySetClipboard(t)
+			if ok then
+				notify("✅ Đã sao chép", "Script/Link đã được copy vào clipboard.", 2)
+			else
+				notify("ℹ️ Không hỗ trợ", "Không thể copy trong môi trường này. Sao chép thủ công.", 4)
+			end
+		else
+			notify("⚠️ Trống", "Bạn chưa nhập gì để sao chép.", 2)
+		end
+	end)
+
+	-- Page Popular: 3 sample buttons (copy link)
+	local popularList = {
+		{title = "💨 Fly V3", link = "https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"},
+		{title = "👑 Infinite Yield", link = "https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"},
+		{title = "🚶‍♂️ Đi Trên Không", link = "https://pastefy.app/Qc1ZIUwO/raw"},
+	}
+
+	for i,info in ipairs(popularList) do
+		local b = Instance.new("TextButton", pagePopular)
+		b.Size = UDim2.new(1, -20, 0, 44)
+		b.Position = UDim2.new(0, 10, 0, (i-1) * 54)
+		b.BackgroundColor3 = Color3.fromRGB(40,28,56)
+		b.TextColor3 = Color3.fromRGB(235,225,255)
+		b.Font = Enum.Font.GothamBold
+		b.Text = info.title
+		Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
+
+		b.MouseButton1Click:Connect(function()
+			-- an toàn: copy link -> bạn có thể paste vào executor
+			local ok = trySetClipboard(info.link)
+			if ok then
+				notify("✅ Link copied", info.title.." - Link đã được sao chép.", 2)
+			else
+				notify("ℹ️ Copy thất bại", "Không hỗ trợ setclipboard. Link:\n" .. info.link, 6)
+			end
+
+			-- === TÙY CHỌN (TỰ CHẠY) ===
+			-- Nếu bạn muốn nút này **tự chạy** script từ URL, bạn có thể:
+			-- 1) tự thêm (trong môi trường executor tin cậy) dòng sau (thêm ở đây):
+			--    local ok, res = pcall(function() return game:HttpGet(info.link) end)
+			--    if ok then loadstring(res)() end
+			-- 2) hoặc paste link vào ô "Nhập Script" rồi run bằng executor.
+			-- MÌNH KHÔNG TỰ CHÈN/CHẠY HTTP LOADSTRING Ở ĐÂY (vì lý do an toàn).
+		end)
+	end
+
+	-- tabs switching
+	tabInputBtn.MouseButton1Click:Connect(function()
+		pageInput.Visible = true
+		pagePopular.Visible = false
+	end)
+	tabPopularBtn.MouseButton1Click:Connect(function()
+		pageInput.Visible = false
+		pagePopular.Visible = true
+	end)
+
+	-- watermark small
+	local watermark = Instance.new("TextLabel", screen)
+	watermark.AnchorPoint = Vector2.new(0.5,0)
+	watermark.Position = UDim2.new(0.5, 0, 0.92, 0)
+	watermark.Size = UDim2.new(0, 260, 0, 22)
+	watermark.BackgroundTransparency = 1
+	watermark.Font = Enum.Font.Gotham
+	watermark.Text = "Made by Dat Dz 💧"
+	watermark.TextColor3 = Color3.fromRGB(160,130,220)
+	watermark.TextTransparency = 0.3
+	watermark.TextScaled = true
+
+	-- small top-right watermark too
+	local wr = Instance.new("TextLabel", screen)
+	wr.Size = UDim2.new(0,160,0,20)
+	wr.Position = UDim2.new(0.78,0,0.02,0)
+	wr.BackgroundTransparency = 1
+	wr.Font = Enum.Font.GothamBold
+	wr.Text = "Dat Dz 💧 RPG Hub"
+	wr.TextColor3 = Color3.fromRGB(170,130,255)
+	wr.TextTransparency = 0.25
+	wr.TextScaled = true
+
+	-- ---------- Avatar toggle (visible always) ----------
+	local avatar = Instance.new("ImageButton", screen)
+	avatar.Name = "DatDz_Avatar"
+	avatar.Size = UDim2.new(0,56,0,56)
+	avatar.Position = UDim2.new(0.03,0,0.12,0)
+	avatar.BackgroundColor3 = Color3.fromRGB(30,22,40)
+	avatar.Image = "rbxassetid://103173399598412"
+	avatar.AutoButtonColor = true
+	Instance.new("UICorner", avatar).CornerRadius = UDim.new(1,10)
+	local stroke = Instance.new("UIStroke", avatar); stroke.Color = Color3.fromRGB(170,130,255); stroke.Thickness = 1.2
+
+	-- toggle behavior: fade + zoom (chill)
+	local isOpen = false
+	avatar.MouseButton1Click:Connect(function()
+		isOpen = not isOpen
+		if isOpen then
+			container.Visible = true
+			-- start small/transparent
+			container.Size = UDim2.new(0,420,0,300)
+			container.BackgroundTransparency = 1
+			container.Position = UDim2.new(0.5,0,0.48,0)
+			TweenService:Create(container, TweenInfo.new(0.42, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				Size = UDim2.new(0,520,0,360),
+				BackgroundTransparency = 0.12,
+				Position = UDim2.new(0.5,0,0.5,0)
+			}):Play()
+		else
+			TweenService:Create(container, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+				Size = UDim2.new(0,420,0,300),
+				BackgroundTransparency = 1,
+				Position = UDim2.new(0.5,0,0.48,0)
+			}):Play()
+			task.delay(0.36, function()
+				if container and container.Parent then container.Visible = false end
+			end)
+		end
+	end)
+
+	-- ensure avatar always on top
+	avatar.ZIndex = 1001
+	container.ZIndex = 1000
+	wr.ZIndex = 1002
+	watermark.ZIndex = 1002
+	-- return screen (for external use)
+	return screen
+end
+
+-- Create at start in PlayerGui and re-create on respawn
+local function ensureGui()
+	local parent = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+	-- create UI in PlayerGui
+	CreateDatDzHub(parent)
+end
+
+ensureGui()
+-- recreate on character added (so GUI returns after reset)
+player.CharacterAdded:Connect(function()
+	task.wait(0.8)
+	ensureGui()
 end)
