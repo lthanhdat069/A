@@ -1,0 +1,169 @@
+-- Telekinesis (Final v3.2 - KRNL GUI Rotation Edition)
+-- Made for KRNL | Keep GUI + Added Rotation Buttons
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local mouse = player:GetMouse()
+
+-- Tool setup
+local tool = script.Parent
+if not tool or not tool:IsA("Tool") then
+    tool = Instance.new("Tool")
+    tool.Name = "Telekinesis"
+    tool.RequiresHandle = false
+    tool.CanBeDropped = false
+    tool.Parent = player:WaitForChild("Backpack")
+end
+
+-- GUI setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TelekGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local container = Instance.new("Frame")
+container.Size = UDim2.new(0,220,0,260)
+container.AnchorPoint = Vector2.new(1,1)
+container.Position = UDim2.new(1,-20,1,-20)
+container.BackgroundTransparency = 1
+container.Visible = false
+container.Parent = screenGui
+
+local function makeBtn(name,pos)
+    local b = Instance.new("TextButton")
+    b.Name = name
+    b.Size = UDim2.new(0,64,0,40)
+    b.Position = pos
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 16
+    b.Text = name
+    b.TextColor3 = Color3.fromRGB(255,255,255)
+    b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+    b.AutoButtonColor = true
+    b.Parent = container
+    return b
+end
+
+-- Movement buttons
+local btnFWD = makeBtn("FWD", UDim2.new(0,78,0,10))
+local btnBCK = makeBtn("BCK", UDim2.new(0,78,0,60))
+local btnLFT = makeBtn("LFT", UDim2.new(0,10,0,35))
+local btnRGT = makeBtn("RGT", UDim2.new(0,146,0,35))
+local btnUP = makeBtn("UP", UDim2.new(0,78,0,110))
+local btnDN = makeBtn("DN", UDim2.new(0,78,0,150))
+local btnThrow= makeBtn("THROW",UDim2.new(0,146,0,110))
+local btnDrop = makeBtn("DROP", UDim2.new(0,10,0,110))
+local btnReset= makeBtn("RESET",UDim2.new(0,10,0,150))
+
+-- Rotation buttons
+local btnRotX = makeBtn("ROT-X", UDim2.new(0,10,0,200))
+local btnRotY = makeBtn("ROT-Y", UDim2.new(0,78,0,200))
+local btnRotZ = makeBtn("ROT-Z", UDim2.new(0,146,0,200))
+
+-- Highlight
+local function makeHighlight(part)
+    local box = Instance.new("SelectionBox")
+    box.Name = "TelekHighlight"
+    box.LineThickness = 0.05
+    box.Adornee = part
+    box.Color3 = Color3.fromRGB(0,200,255)
+    box.Parent = part
+    return box
+end
+
+-- Core logic
+local target, bodyPos, bodyGyro
+
+local function startControl(part)
+    target = part
+    if not target then return end
+
+    makeHighlight(target)
+    bodyPos = Instance.new("BodyPosition", target)
+    bodyPos.MaxForce = Vector3.new(1e6,1e6,1e6)
+    bodyPos.D = 200
+    bodyPos.P = 8000
+
+    bodyGyro = Instance.new("BodyGyro", target)
+    bodyGyro.MaxTorque = Vector3.new(1e6,1e6,1e6)
+    bodyGyro.P = 4000
+    bodyGyro.CFrame = target.CFrame
+
+    container.Visible = true
+end
+
+local function stopControl()
+    if target then
+        local highlight = target:FindFirstChild("TelekHighlight")
+        if highlight then highlight:Destroy() end
+        if bodyPos then bodyPos:Destroy() end
+        if bodyGyro then bodyGyro:Destroy() end
+    end
+    target = nil
+    container.Visible = false
+end
+
+-- Mouse pick
+mouse.Button1Down:Connect(function()
+    local targetPart = mouse.Target
+    if targetPart and targetPart:IsA("BasePart") and targetPart.Anchored == false then
+        startControl(targetPart)
+    end
+end)
+
+btnDrop.MouseButton1Click:Connect(stopControl)
+btnReset.MouseButton1Click:Connect(function()
+    if target then
+        target.CFrame = CFrame.new(target.Position)
+        bodyGyro.CFrame = target.CFrame
+    end
+end)
+
+-- Movement control
+local moveDist = 2
+local function move(offset)
+    if target then
+        bodyPos.Position = bodyPos.Position + offset
+    end
+end
+
+btnFWD.MouseButton1Click:Connect(function() move(camera.CFrame.LookVector * moveDist) end)
+btnBCK.MouseButton1Click:Connect(function() move(-camera.CFrame.LookVector * moveDist) end)
+btnLFT.MouseButton1Click:Connect(function() move(-camera.CFrame.RightVector * moveDist) end)
+btnRGT.MouseButton1Click:Connect(function() move(camera.CFrame.RightVector * moveDist) end)
+btnUP.MouseButton1Click:Connect(function() move(Vector3.new(0,moveDist,0)) end)
+btnDN.MouseButton1Click:Connect(function() move(Vector3.new(0,-moveDist,0)) end)
+
+-- Rotation control
+local rotStep = math.rad(15) -- xoay 15 độ mỗi lần
+btnRotX.MouseButton1Click:Connect(function()
+    if target and bodyGyro then
+        bodyGyro.CFrame = bodyGyro.CFrame * CFrame.Angles(rotStep,0,0)
+    end
+end)
+btnRotY.MouseButton1Click:Connect(function()
+    if target and bodyGyro then
+        bodyGyro.CFrame = bodyGyro.CFrame * CFrame.Angles(0,rotStep,0)
+    end
+end)
+btnRotZ.MouseButton1Click:Connect(function()
+    if target and bodyGyro then
+        bodyGyro.CFrame = bodyGyro.CFrame * CFrame.Angles(0,0,rotStep)
+    end
+end)
+
+-- Throw
+btnThrow.MouseButton1Click:Connect(function()
+    if target then
+        target:FindFirstChildOfClass("BodyPosition"):Destroy()
+        target:FindFirstChildOfClass("BodyGyro"):Destroy()
+        target.Velocity = camera.CFrame.LookVector * 100
+        stopControl()
+    end
+end)
+
+-- Disable on unequip
+tool.Unequipped:Connect(stopControl)
