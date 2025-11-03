@@ -1,14 +1,33 @@
--- Telekinesis (Final v3.2 - KRNL GUI Rotation Edition)
--- Made for KRNL | Keep GUI + Added Rotation Buttons
+-- Telekinesis v4 Full (KRNL Ready) - Client
+-- One client script: Telekinesis GUI + rotation + top summon bar (calls server RemoteEvent SummonDummyEvent)
+-- Inject bằng KRNL (script tự wait game load). Server must run SummonDummyServer.lua in ServerScriptService.
 
+-- ===== Wait & services =====
+if not game:IsLoaded() then game.Loaded:Wait() end
+repeat task.wait() until game.Players and game.Players.LocalPlayer
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 local player = Players.LocalPlayer
+repeat task.wait() until player.Character
 local camera = workspace.CurrentCamera
 local mouse = player:GetMouse()
 
--- Tool setup
+-- Ensure PlayerGui
+if not player:FindFirstChild("PlayerGui") then
+    local pg = Instance.new("PlayerGui")
+    pg.Name = "PlayerGui"
+    pg.Parent = player
+end
+
+-- Ensure RemoteEvent reference (will wait when needed)
+local function getRemote()
+    return ReplicatedStorage:FindFirstChild("SummonDummyEvent") or ReplicatedStorage:WaitForChild("SummonDummyEvent")
+end
+
+-- ===== Tool (so it appears in backpack) =====
 local tool = script.Parent
 if not tool or not tool:IsA("Tool") then
     tool = Instance.new("Tool")
@@ -18,14 +37,17 @@ if not tool or not tool:IsA("Tool") then
     tool.Parent = player:WaitForChild("Backpack")
 end
 
--- GUI setup
+-- ===== GUI =====
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TelekGUI"
+screenGui.Name = "TeleGUI_Telekinesis_v4"
 screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.IgnoreGuiInset = true
+screenGui.Parent = player.PlayerGui
 
+-- Container bottom-right (original telekinesis controls)
 local container = Instance.new("Frame")
-container.Size = UDim2.new(0,220,0,260)
+container.Name = "TK_Container"
+container.Size = UDim2.new(0,300,0,260)
 container.AnchorPoint = Vector2.new(1,1)
 container.Position = UDim2.new(1,-20,1,-20)
 container.BackgroundTransparency = 1
@@ -35,7 +57,7 @@ container.Parent = screenGui
 local function makeBtn(name,pos)
     local b = Instance.new("TextButton")
     b.Name = name
-    b.Size = UDim2.new(0,64,0,40)
+    b.Size = UDim2.new(0,70,0,40)
     b.Position = pos
     b.Font = Enum.Font.GothamBold
     b.TextSize = 16
@@ -48,23 +70,72 @@ local function makeBtn(name,pos)
 end
 
 -- Movement buttons
-local btnFWD = makeBtn("FWD", UDim2.new(0,78,0,10))
-local btnBCK = makeBtn("BCK", UDim2.new(0,78,0,60))
-local btnLFT = makeBtn("LFT", UDim2.new(0,10,0,35))
-local btnRGT = makeBtn("RGT", UDim2.new(0,146,0,35))
-local btnUP = makeBtn("UP", UDim2.new(0,78,0,110))
-local btnDN = makeBtn("DN", UDim2.new(0,78,0,150))
-local btnThrow= makeBtn("THROW",UDim2.new(0,146,0,110))
-local btnDrop = makeBtn("DROP", UDim2.new(0,10,0,110))
-local btnReset= makeBtn("RESET",UDim2.new(0,10,0,150))
+local btnFWD = makeBtn("FWD", UDim2.new(0,110,0,6))
+local btnBCK = makeBtn("BCK", UDim2.new(0,110,0,56))
+local btnLFT = makeBtn("LFT", UDim2.new(0,20,0,31))
+local btnRGT = makeBtn("RGT", UDim2.new(0,200,0,31))
+local btnUP  = makeBtn("UP",  UDim2.new(0,110,0,106))
+local btnDN  = makeBtn("DN",  UDim2.new(0,110,0,146))
+local btnThrow= makeBtn("THROW",UDim2.new(0,200,0,106))
+local btnDrop = makeBtn("DROP", UDim2.new(0,20,0,106))
+local btnReset= makeBtn("RESET", UDim2.new(0,20,0,146))
 
 -- Rotation buttons
-local btnRotX = makeBtn("ROT-X", UDim2.new(0,10,0,200))
-local btnRotY = makeBtn("ROT-Y", UDim2.new(0,78,0,200))
-local btnRotZ = makeBtn("ROT-Z", UDim2.new(0,146,0,200))
+local btnRotX = makeBtn("ROT-X", UDim2.new(0,20,0,196))
+local btnRotY = makeBtn("ROT-Y", UDim2.new(0,110,0,196))
+local btnRotZ = makeBtn("ROT-Z", UDim2.new(0,200,0,196))
 
--- Highlight
+-- Top horizontal bar (for summon) — full width small bar
+local topBar = Instance.new("Frame")
+topBar.Name = "TK_TopBar"
+topBar.Size = UDim2.new(1,0,0,40)
+topBar.Position = UDim2.new(0,0,0,0)
+topBar.BackgroundTransparency = 0.15
+topBar.BorderSizePixel = 0
+topBar.BackgroundColor3 = Color3.fromRGB(20,20,20)
+topBar.Parent = screenGui
+
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(0,220,0,28)
+label.Position = UDim2.new(0,8,0,6)
+label.BackgroundTransparency = 1
+label.Font = Enum.Font.GothamBold
+label.TextSize = 16
+label.TextColor3 = Color3.fromRGB(255,255,255)
+label.Text = "Summon Dummy (server)"
+label.Parent = topBar
+
+local txtUser = Instance.new("TextBox")
+txtUser.Size = UDim2.new(0,200,0,24)
+txtUser.Position = UDim2.new(0,240,0,8)
+txtUser.Font = Enum.Font.Gotham
+txtUser.PlaceholderText = "Enter username"
+txtUser.Text = ""
+txtUser.TextSize = 14
+txtUser.TextColor3 = Color3.fromRGB(255,255,255)
+txtUser.BackgroundColor3 = Color3.fromRGB(35,35,35)
+txtUser.Parent = topBar
+
+local function makeTopBtn(text, posX)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(0,96,0,28)
+    b.Position = UDim2.new(0,posX,0,6)
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 14
+    b.Text = text
+    b.TextColor3 = Color3.fromRGB(255,255,255)
+    b.BackgroundColor3 = Color3.fromRGB(45,45,45)
+    b.Parent = topBar
+    return b
+end
+
+local btnSummonTop = makeTopBtn("SUMMON", 460)
+local btnClearTop  = makeTopBtn("CLEAR", 560)
+local btnClearAllTop = makeTopBtn("CLEAR ALL", 660)
+
+-- Highlight helper
 local function makeHighlight(part)
+    if not part then return end
     local box = Instance.new("SelectionBox")
     box.Name = "TelekHighlight"
     box.LineThickness = 0.05
@@ -74,58 +145,101 @@ local function makeHighlight(part)
     return box
 end
 
--- Core logic
-local target, bodyPos, bodyGyro
+-- Core telekinesis
+local target = nil
+local bodyPos = nil
+local bodyGyro = nil
+local holdDistance = 8
+local moveDist = 2
+local rotStep = math.rad(15)
 
-local function startControl(part)
-    target = part
-    if not target then return end
+local function attachPhysicsTo(part)
+    if not part then return end
+    if part:FindFirstChildOfClass("BodyPosition") then part:FindFirstChildOfClass("BodyPosition"):Destroy() end
+    if part:FindFirstChildOfClass("BodyGyro") then part:FindFirstChildOfClass("BodyGyro"):Destroy() end
 
-    makeHighlight(target)
-    bodyPos = Instance.new("BodyPosition", target)
+    bodyPos = Instance.new("BodyPosition")
+    bodyPos.Name = "TK_BodyPosition"
     bodyPos.MaxForce = Vector3.new(1e6,1e6,1e6)
     bodyPos.D = 200
     bodyPos.P = 8000
+    bodyPos.Position = part.Position
+    bodyPos.Parent = part
 
-    bodyGyro = Instance.new("BodyGyro", target)
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.Name = "TK_BodyGyro"
     bodyGyro.MaxTorque = Vector3.new(1e6,1e6,1e6)
     bodyGyro.P = 4000
-    bodyGyro.CFrame = target.CFrame
+    bodyGyro.CFrame = part.CFrame
+    bodyGyro.Parent = part
+end
 
+local function startControl(part)
+    if not part or not part:IsA("BasePart") then return end
+    if player.Character and part:IsDescendantOf(player.Character) then return end
+    if part.Anchored then return end
+
+    target = part
+    pcall(function() makeHighlight(target) end)
+    attachPhysicsTo(target)
     container.Visible = true
 end
 
 local function stopControl()
     if target then
-        local highlight = target:FindFirstChild("TelekHighlight")
-        if highlight then highlight:Destroy() end
-        if bodyPos then bodyPos:Destroy() end
-        if bodyGyro then bodyGyro:Destroy() end
+        pcall(function()
+            local h = target:FindFirstChild("TelekHighlight")
+            if h then h:Destroy() end
+            local bp = target:FindFirstChild("TK_BodyPosition")
+            local bg = target:FindFirstChild("TK_BodyGyro")
+            if bp then bp:Destroy() end
+            if bg then bg:Destroy() end
+        end)
     end
     target = nil
+    bodyPos = nil
+    bodyGyro = nil
     container.Visible = false
 end
 
--- Mouse pick
-mouse.Button1Down:Connect(function()
-    local targetPart = mouse.Target
-    if targetPart and targetPart:IsA("BasePart") and targetPart.Anchored == false then
-        startControl(targetPart)
+local function computeHoldPos()
+    local camCFrame = camera.CFrame
+    return camCFrame.Position + camCFrame.LookVector * holdDistance
+end
+
+-- Update loop
+local running = true
+spawn(function()
+    while running do
+        RunService.Heartbeat:Wait()
+        if target and bodyPos and bodyGyro then
+            local desired = computeHoldPos()
+            pcall(function()
+                bodyPos.Position = desired
+                bodyGyro.CFrame = CFrame.new(desired) * (bodyGyro.CFrame - bodyGyro.CFrame.Position)
+            end)
+        end
     end
 end)
 
+-- Mouse pick
+mouse.Button1Down:Connect(function()
+    local t = mouse.Target
+    if t and t:IsA("BasePart") and not t.Anchored then
+        startControl(t)
+    end
+end)
+
+-- Buttons functionality
 btnDrop.MouseButton1Click:Connect(stopControl)
 btnReset.MouseButton1Click:Connect(function()
-    if target then
-        target.CFrame = CFrame.new(target.Position)
+    if target and bodyGyro then
         bodyGyro.CFrame = target.CFrame
     end
 end)
 
--- Movement control
-local moveDist = 2
 local function move(offset)
-    if target then
+    if target and bodyPos then
         bodyPos.Position = bodyPos.Position + offset
     end
 end
@@ -137,8 +251,6 @@ btnRGT.MouseButton1Click:Connect(function() move(camera.CFrame.RightVector * mov
 btnUP.MouseButton1Click:Connect(function() move(Vector3.new(0,moveDist,0)) end)
 btnDN.MouseButton1Click:Connect(function() move(Vector3.new(0,-moveDist,0)) end)
 
--- Rotation control
-local rotStep = math.rad(15) -- xoay 15 độ mỗi lần
 btnRotX.MouseButton1Click:Connect(function()
     if target and bodyGyro then
         bodyGyro.CFrame = bodyGyro.CFrame * CFrame.Angles(rotStep,0,0)
@@ -155,15 +267,64 @@ btnRotZ.MouseButton1Click:Connect(function()
     end
 end)
 
--- Throw
 btnThrow.MouseButton1Click:Connect(function()
     if target then
-        target:FindFirstChildOfClass("BodyPosition"):Destroy()
-        target:FindFirstChildOfClass("BodyGyro"):Destroy()
-        target.Velocity = camera.CFrame.LookVector * 100
+        pcall(function()
+            local bp = target:FindFirstChild("TK_BodyPosition")
+            if bp then bp:Destroy() end
+            local bg = target:FindFirstChild("TK_BodyGyro")
+            if bg then bg:Destroy() end
+            if target:IsA("BasePart") then
+                local vel = camera.CFrame.LookVector * 120
+                if pcall(function() target.AssemblyLinearVelocity = vel end) then
+                else
+                    target.Velocity = vel
+                end
+            end
+        end)
         stopControl()
     end
 end)
 
--- Disable on unequip
 tool.Unequipped:Connect(stopControl)
+
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if not target then return end
+    if input.KeyCode == Enum.KeyCode.Equals or input.KeyCode == Enum.KeyCode.KeypadPlus then
+        holdDistance = math.clamp(holdDistance + 1, 2, 120)
+    elseif input.KeyCode == Enum.KeyCode.Minus or input.KeyCode == Enum.KeyCode.KeypadMinus then
+        holdDistance = math.clamp(holdDistance - 1, 2, 120)
+    end
+end)
+
+-- ===== Top bar actions (call server RemoteEvent) =====
+local function spawnCFrameInFront(dist)
+    dist = dist or 5
+    local cam = workspace.CurrentCamera
+    if not cam then return CFrame.new(Vector3.new(0,5,0)) end
+    return CFrame.new(cam.CFrame.Position + cam.CFrame.LookVector * dist)
+end
+
+btnSummonTop.MouseButton1Click:Connect(function()
+    local name = txtUser.Text
+    if not name or name:match("^%s*$") then
+        warn("Enter username to summon")
+        return
+    end
+    local remote = getRemote()
+    local cf = spawnCFrameInFront(5)
+    pcall(function() remote:FireServer("SUMMON", name, cf) end)
+end)
+
+btnClearTop.MouseButton1Click:Connect(function()
+    local remote = getRemote()
+    pcall(function() remote:FireServer("CLEAR") end)
+end)
+
+btnClearAllTop.MouseButton1Click:Connect(function()
+    local remote = getRemote()
+    pcall(function() remote:FireServer("CLEAR_ALL") end)
+end)
+
+-- End of client script
