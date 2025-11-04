@@ -1,0 +1,159 @@
+--// GUI Script Atualizado by Dat Hub
+
+-- Função RGB
+local function rgbEffect(obj)
+    task.spawn(function()
+        while task.wait() do
+            for i = 0, 1, 0.01 do
+                obj.TextColor3 = Color3.fromHSV(i, 1, 1)
+                task.wait()
+            end
+        end
+    end)
+end
+
+-- Criando ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Fundo principal
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 320, 0, 180)
+Frame.Position = UDim2.new(0.5, -160, 0.5, -90) -- centralizado
+Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BackgroundTransparency = 0.3
+Frame.BorderSizePixel = 0
+Frame.Parent = ScreenGui
+
+-- UICorner
+local UICorner = Instance.new("UICorner", Frame)
+UICorner.CornerRadius = UDim.new(0, 12)
+
+-- Borda RGB
+local UIStroke = Instance.new("UIStroke", Frame)
+UIStroke.Thickness = 3
+task.spawn(function()
+    while task.wait() do
+        for i = 0, 1, 0.01 do
+            UIStroke.Color = Color3.fromHSV(i, 1, 1)
+            task.wait()
+        end
+    end
+end)
+
+-- Movimentar GUI
+local UIS = game:GetService("UserInputService")
+local dragging, dragInput, dragStart, startPos
+
+Frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = Frame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+Frame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        Frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- Título
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -40, 0, 40) -- espaço pro botão fechar
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.Text = "DAT"
+Title.TextSize = 22
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Parent = Frame
+rgbEffect(Title)
+
+-- Botão fechar (X)
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0, 5)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+CloseBtn.Text = "X"
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 20
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.Parent = Frame
+
+local BtnCornerX = Instance.new("UICorner", CloseBtn)
+BtnCornerX.CornerRadius = UDim.new(0, 6)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Botão Copiar
+local Button = Instance.new("TextButton")
+Button.Size = UDim2.new(0, 200, 0, 50)
+Button.Position = UDim2.new(0.18, 0, 0.45, 0)
+Button.BackgroundColor3 = Color3.fromRGB(88, 101, 242) -- Roxo estilo Discord
+Button.Text = "Copiar Discord"
+Button.Font = Enum.Font.GothamBold
+Button.TextSize = 18
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.Parent = Frame
+
+local BtnCorner = Instance.new("UICorner", Button)
+BtnCorner.CornerRadius = UDim.new(0, 10)
+
+-- Ícone do Discord
+local Icon = Instance.new("ImageLabel")
+Icon.Size = UDim2.new(0, 26, 0, 26)
+Icon.Position = UDim2.new(0, 6, 0.5, -13)
+Icon.BackgroundTransparency = 1
+Icon.Image = "rbxassetid://3561762324"
+Icon.Parent = Button
+
+-- Copiar Discord
+Button.MouseButton1Click:Connect(function()
+    setclipboard("https://discord.gg/5GyJq9FAW")
+    Button.Text = "✅ Copiado!"
+    task.wait(2)
+    Button.Text = "Copiar Discord"
+end)--// Botão Copiar WhatsApp
+local ButtonWhats = Instance.new("TextButton")
+ButtonWhats.Size = UDim2.new(0, 200, 0, 50)
+ButtonWhats.Position = UDim2.new(0.18, 0, 0.65, 0) -- um pouco abaixo do botão Discord
+ButtonWhats.BackgroundColor3 = Color3.fromRGB(0, 200, 0) -- Verde
+ButtonWhats.Text = "Copiar WhatsApp"
+ButtonWhats.Font = Enum.Font.GothamBold
+ButtonWhats.TextSize = 18
+ButtonWhats.TextColor3 = Color3.fromRGB(255, 255, 255)
+ButtonWhats.Parent = Frame
+
+local BtnCornerWhats = Instance.new("UICorner", ButtonWhats)
+BtnCornerWhats.CornerRadius = UDim.new(0, 10)
+
+-- Ícone do WhatsApp
+local IconWhats = Instance.new("ImageLabel")
+IconWhats.Size = UDim2.new(0, 26, 0, 26)
+IconWhats.Position = UDim2.new(0, 6, 0.5, -13)
+IconWhats.BackgroundTransparency = 1
+IconWhats.Image = "rbxassetid://6031094676" -- Ícone estilo WhatsApp
+IconWhats.Parent = ButtonWhats
+
+-- Copiar WhatsApp
+ButtonWhats.MouseButton1Click:Connect(function()
+    setclipboard("https://chat.whatsapp.com/BrdRcTiovTlJn29FPkTIze?mode=ems_copy_t")
+    ButtonWhats.Text = "✅ Copiado!"
+    task.wait(2)
+    ButtonWhats.Text = "Copiar WhatsApp"
+end)
