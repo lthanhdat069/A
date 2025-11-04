@@ -1,0 +1,245 @@
+-- GlassModScript V3 – AntiLag Edition
+-- By mod script vn 🇻🇳 | Optimized for KRNL
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local Debris = game:GetService("Debris")
+local player = Players.LocalPlayer
+local char, root, hum
+
+--== Settings ==
+local shieldEnabled = false
+local shieldPart = nil
+local repelConn = nil
+local repelForce = 100
+local maxRepel = 500
+local shieldSize = Vector3.new(30,30,30)
+local shieldColor = Color3.fromRGB(0,255,255)
+local shieldLightEnabled = true
+
+--== UI ==
+local gui = Instance.new("ScreenGui")
+gui.Name = "GlassShieldUI"
+gui.IgnoreGuiInset = true
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Toggle button
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0,40,0,40)
+toggleBtn.Position = UDim2.new(0,20,1,-80)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+toggleBtn.Text = "🔰"
+toggleBtn.TextScaled = true
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextColor3 = Color3.fromRGB(0,255,255)
+toggleBtn.Parent = gui
+
+-- Menu Frame (bo góc)
+local menu = Instance.new("Frame")
+menu.Size = UDim2.new(0,250,0,300)
+menu.Position = UDim2.new(0,20,1,-350)
+menu.BackgroundColor3 = Color3.fromRGB(30,30,30)
+menu.BackgroundTransparency = 0.25
+menu.BorderSizePixel = 0
+menu.Visible = false
+menu.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0,12)
+corner.Parent = menu
+
+local layout = Instance.new("UIListLayout")
+layout.Parent = menu
+layout.Padding = UDim.new(0,5)
+layout.FillDirection = Enum.FillDirection.Vertical
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- Drag menu
+local dragging, dragStart, startPos = false
+menu.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = menu.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then dragging = false end
+		end)
+	end
+end)
+UserInputService.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		menu.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+-- Toggle menu
+toggleBtn.MouseButton1Click:Connect(function()
+	menu.Visible = not menu.Visible
+end)
+
+-- Helpers
+local function createButton(text,parent,callback)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1,-20,0,30)
+	btn.Position = UDim2.new(0,10,0,0)
+	btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+	btn.BorderSizePixel = 0
+	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 18
+	btn.Text = text
+	btn.Parent = parent
+	local c = Instance.new("UICorner", btn)
+	c.CornerRadius = UDim.new(0,8)
+	btn.MouseButton1Click:Connect(callback)
+	return btn
+end
+
+local function createSlider(text,parent,min,max,default,callback)
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(1,0,0,40)
+	frame.BackgroundTransparency = 1
+	frame.Parent = parent
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1,-20,0,20)
+	label.Position = UDim2.new(0,10,0,0)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.fromRGB(255,255,255)
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = 16
+	label.Text = text.." "..tostring(default)
+	label.Parent = frame
+	local slider = Instance.new("TextButton")
+	slider.Size = UDim2.new(1,-20,0,20)
+	slider.Position = UDim2.new(0,10,0,20)
+	slider.BackgroundColor3 = Color3.fromRGB(70,70,70)
+	slider.BorderSizePixel = 0
+	slider.Text = ""
+	slider.Parent = frame
+	local sc = Instance.new("UICorner", slider)
+	sc.CornerRadius = UDim.new(0,8)
+	local dragging = false
+	local function updateSlider(input)
+		local pos = math.clamp(input.Position.X - slider.AbsolutePosition.X,0,slider.AbsoluteSize.X)
+		local value = min + (pos/slider.AbsoluteSize.X)*(max-min)
+		value = math.floor(value)
+		label.Text = text.." "..tostring(value)
+		callback(value)
+	end
+	slider.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			updateSlider(input)
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then dragging = false end
+			end)
+		end
+	end)
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging then updateSlider(input) end
+	end)
+end
+
+-- Shield
+local function createShield()
+	if shieldPart then shieldPart:Destroy() end
+	local part = Instance.new("Part")
+	part.Name = "GlassShield"
+	part.Size = shieldSize
+	part.Anchored = true
+	part.CanCollide = false
+	part.CanTouch = false
+	part.Material = Enum.Material.ForceField
+	part.Color = shieldColor
+	part.Transparency = 0.35
+	part.Parent = Workspace
+	shieldPart = part
+
+	-- Hiệu ứng sóng khi bật
+	local wave = Instance.new("ParticleEmitter")
+	wave.Texture = "rbxassetid://243660364"
+	wave.Speed = NumberRange.new(10)
+	wave.Size = NumberSequence.new({NumberSequenceKeypoint.new(0,3), NumberSequenceKeypoint.new(1,0)})
+	wave.Lifetime = NumberRange.new(0.8)
+	wave.Rate = 30
+	wave.Rotation = NumberRange.new(0,360)
+	wave.Color = ColorSequence.new(shieldColor)
+	wave.Parent = part
+	game:GetService("Debris"):AddItem(wave,1)
+
+	if shieldLightEnabled then
+		local light = Instance.new("PointLight")
+		light.Range = 50
+		light.Brightness = 4
+		light.Color = shieldColor
+		light.Parent = part
+	end
+end
+
+local function updateShield()
+	if shieldPart and root then
+		shieldPart.CFrame = root.CFrame
+	end
+end
+
+-- Lọc chỉ đối tượng gần
+local function repelNearby()
+	if not root then return end
+	local range = (shieldSize.X/2) + 10
+	for _, obj in ipairs(Workspace:GetPartBoundsInRadius(root.Position, range)) do
+		if obj:IsA("BasePart") and not obj.Anchored and not obj:IsDescendantOf(player.Character) then
+			local dir = (obj.Position - root.Position).Unit
+			local dist = (obj.Position - root.Position).Magnitude
+			if dist < range then
+				local bv = Instance.new("BodyVelocity")
+				bv.Velocity = dir * repelForce
+				bv.MaxForce = Vector3.new(1e5,1e5,1e5)
+				bv.P = 1e4
+				bv.Parent = obj
+				Debris:AddItem(bv,0.05)
+			end
+		end
+	end
+end
+
+-- Toggle Shield
+local function toggleShield()
+	if not char or not root then return end
+	shieldEnabled = not shieldEnabled
+	if shieldEnabled then
+		toggleBtn.Text = "Glass: ON"
+		createShield()
+		repelConn = RunService.Heartbeat:Connect(function()
+			updateShield()
+			repelNearby()
+		end)
+	else
+		toggleBtn.Text = "Glass: OFF"
+		if repelConn then repelConn:Disconnect() end
+		if shieldPart then shieldPart:Destroy() end
+	end
+end
+
+-- UI
+createButton("Bật/Tắt Khiên",menu,toggleShield)
+createSlider("Kích thước",menu,10,100,30,function(v) shieldSize=Vector3.new(v,v,v) end)
+createSlider("Lực đẩy",menu,10,maxRepel,100,function(v) repelForce=v end)
+createButton("Đổi màu",menu,function()
+	shieldColor=Color3.fromRGB(math.random(0,255),math.random(0,255),math.random(0,255))
+	if shieldPart then shieldPart.Color=shieldColor end
+end)
+
+-- Character load
+local function onCharacterAdded(c)
+	char = c
+	root = c:WaitForChild("HumanoidRootPart")
+	hum = c:WaitForChild("Humanoid")
+end
+player.CharacterAdded:Connect(onCharacterAdded)
+if player.Character then onCharacterAdded(player.Character) end
