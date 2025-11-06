@@ -1,0 +1,65 @@
+-- Tạo GUI chính
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Tạo khung menu (Frame)
+local frame = Instance.new("Frame")
+frame.Parent = screenGui
+frame.Size = UDim2.new(0, 250, 0, 150)
+frame.Position = UDim2.new(0.5, -125, 0.5, -75)
+frame.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+frame.Visible = false -- ẩn menu lúc đầu
+local toggle = Instance.new("TextButton")
+toggle.Parent = screenGui
+toggle.Text = "Mở Menu"
+toggle.Size = UDim2.new(0, 120, 0, 40)
+toggle.Position = UDim2.new(0.05, 0, 0.8, 0)
+toggle.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+toggle.MouseButton1Click:Connect(function()
+	-- nếu menu đang ẩn thì bật, còn đang bật thì ẩn
+	if frame.Visible == false then
+		frame.Visible = true
+		toggle.Text = "Chết"
+	else
+		frame.Visible = false
+		toggle.Text = "Sống"
+	end
+end)
+Instance.New("Menu")
+Instance.New("frame")
+local screengui=
+Instance.New("Screengui")
+screengui.parent =
+game.player.localPlayer:waitforchild("playergui")
+local button =
+Instance.New("Button")
+button.parent =
+screengui
+Button.Text = "Ấn vào đi mấy ní"
+button.size =
+Udim2.new(0,200,0,50)
+button.Position =
+Udim2.new(0.5,-100,05,-25)
+Button.backgroundColor4 = Color3.FromRGB(0,225,150)
+button.mousebutton1click:connect(function)()print("máy chú có fifai không?")
+end)
+local button1 =
+Instance.new("TextButton")
+button1.parent = frame
+button1.text = "hải quay xe"
+button1.size =
+Udim2.new(0,200,0,40)
+button1.position =
+udim.new(0,25,0,20)
+button1.backgroundColer4 =
+Color4.FromRGB(255,255,255)
+button1.mousebutton1click:connect(function)()
+  local r =
+  math.random(0,255)
+  local g =
+  math.random(0,255)
+  local b =
+  math.random(0,255)
+  
+  frame.backgroundColer3= coler3.fromRGB(r,g,b)
+end)
